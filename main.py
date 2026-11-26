@@ -556,26 +556,21 @@ def scene_refinery(cv, x, y, w, h):
     cv.fill_rect(x, y, w, 26, (226, 148, 74))
     cv.fill_rect(x, y + 26, w, 26, (198, 96, 52))
     cv.fill_rect(x, y + 52, w, h - 52, (74, 48, 52))
-    # smoke plume: one connected, irregular mass rising from the tanks —
-    # wobbly polygon base + layered puffs, dark at the root, pale at the
-    # top, so it reads as smoke, not separate balloons
-    cv.fill_poly([(x + 136, y + 56), (x + 130, y + 46), (x + 134, y + 36),
-                  (x + 128, y + 28), (x + 136, y + 20), (x + 140, y + 14),
-                  (x + 150, y + 10), (x + 160, y + 4), (x + 172, y + 2),
-                  (x + 184, y + 4), (x + 196, y + 8), (x + 204, y + 12),
-                  (x + 210, y + 18), (x + 206, y + 26), (x + 212, y + 32),
-                  (x + 202, y + 40), (x + 192, y + 46), (x + 180, y + 50),
-                  (x + 164, y + 54), (x + 150, y + 58)], (128, 124, 118))
-    for (sx, sy, sr, col) in [(142, 48, 7, (98, 94, 88)),
-                              (158, 52, 6, (104, 100, 94)),
-                              (170, 50, 6, (100, 96, 90)),
-                              (150, 34, 9, (120, 116, 110)),
-                              (168, 26, 10, (134, 130, 124)),
-                              (186, 20, 9, (142, 138, 132)),
-                              (172, 12, 10, (150, 146, 140)),
-                              (192, 11, 10, (156, 152, 146)),
-                              (200, 16, 7, (150, 146, 140))]:
-        cv.fill_circle(x + sx, y + sy, sr, col)
+    # smoke plume, variant A (winner): a rising column of heavily
+    # overlapping ellipses — narrow dark root over the tanks, widening and
+    # paling as it climbs, drifting slightly right; no single disc reads
+    # alone, silhouette is vertical so it reads as smoke going up
+    for (sx, sy, rx, ry, col) in [(147, 57, 6, 4, (98, 94, 88)),
+                                  (149, 51, 7, 5, (102, 98, 92)),
+                                  (152, 45, 8, 5, (108, 104, 98)),
+                                  (155, 39, 9, 5, (116, 112, 106)),
+                                  (158, 33, 10, 6, (124, 120, 114)),
+                                  (161, 27, 11, 6, (132, 128, 122)),
+                                  (165, 21, 11, 6, (140, 136, 130)),
+                                  (168, 15, 10, 6, (147, 143, 137)),
+                                  (171, 10, 9, 5, (153, 149, 143)),
+                                  (173, 5, 7, 4, (158, 154, 148))]:
+        cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
     # towers and tanks
     cv.fill_rect(x + 24, y + 34, 14, h - 34, (38, 34, 36))
     cv.fill_rect(x + 44, y + 44, 12, h - 44, (38, 34, 36))
