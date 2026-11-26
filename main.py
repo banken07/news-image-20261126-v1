@@ -28,8 +28,8 @@ RED = (172, 32, 28)
 RED_DK = (140, 24, 22)
 RULE = (26, 24, 20)
 SEA = (233, 227, 208)
-LAND = (216, 206, 178)
-LAND_LINE = (140, 128, 100)
+LAND = (192, 178, 140)  # v1.2: darkened — land/sea contrast 1.22 -> ~1.65
+LAND_LINE = (96, 84, 58)  # v1.2: darker coastline, drawn 2px in draw_map
 GREEN = (42, 92, 52)
 GREEN_BG = (226, 236, 222)
 BLUE = (38, 74, 118)
@@ -606,6 +606,22 @@ SCENES = {"tariffs": scene_tariffs, "refinery": scene_refinery,
           "parade": scene_parade}
 
 
+# v1.2: one consistent stroke weight (SW = 3px) for every spot icon.
+# Silhouettes are filled polys; linear strokes are 3px discs along the path.
+SW = 3
+
+
+def stroke3(cv, pts, c):
+    for i in range(len(pts) - 1):
+        x0, y0 = pts[i]
+        x1, y1 = pts[i + 1]
+        steps = int(max(abs(x1 - x0), abs(y1 - y0))) + 1
+        for s in range(steps + 1):
+            t = s / float(steps)
+            cv.fill_circle(int(round(x0 + (x1 - x0) * t)),
+                           int(round(y0 + (y1 - y0) * t)), 1, c)
+
+
 def draw_icon(cv, x, y, w, h, key):
     bg = {"flame": (58, 44, 40), "jet": (206, 220, 232),
           "chart": (238, 232, 216), "train": (176, 32, 28),
@@ -615,62 +631,140 @@ def draw_icon(cv, x, y, w, h, key):
     cv.fill_rect(x, y, w, h, bg)
     cx, cy = x + w // 2, y + h // 2
     if key == "flame":
-        cv.fill_poly([(cx - 13, cy + 12), (cx - 4, cy - 12), (cx + 2, cy - 2),
-                      (cx + 8, cy - 14), (cx + 14, cy + 12)], (232, 120, 30))
-        cv.fill_poly([(cx - 6, cy + 12), (cx, cy - 2), (cx + 6, cy + 12)],
+        # tanker truck (side view, facing right) with flame over the tank
+        cv.fill_poly([(cx - 40, cy + 1), (cx - 36, cy - 12), (cx - 32, cy - 5),
+                      (cx - 28, cy - 16), (cx - 22, cy + 1)], (232, 120, 30))
+        cv.fill_poly([(cx - 35, cy + 1), (cx - 32, cy - 7), (cx - 28, cy + 1)],
                      (250, 205, 80))
+        cv.fill_rect(cx - 52, cy + 1, 54, 12, (248, 244, 233))
+        cv.rect(cx - 52, cy + 1, 54, 12, INK, 3)
+        cv.fill_rect(cx - 30, cy - 2, 10, 3, INK)
+        cv.fill_rect(cx + 6, cy + 1, 22, 12, RED)
+        cv.rect(cx + 6, cy + 1, 22, 12, INK, 3)
+        cv.fill_rect(cx + 16, cy + 3, 8, 5, (248, 244, 233))
+        for wx in (cx - 42, cx - 18, cx + 17):
+            cv.fill_circle(wx, cy + 14, 4, INK)
+            cv.fill_circle(wx, cy + 14, 2, (248, 244, 233))
     elif key == "jet":
-        cv.fill_poly([(cx - 16, cy + 2), (cx + 18, cy - 6), (cx + 10, cy + 2),
-                      (cx + 18, cy + 8), (cx - 16, cy + 6)], (38, 42, 48))
-        cv.fill_poly([(cx - 6, cy - 8), (cx + 2, cy - 2), (cx - 10, cy - 2)],
+        # fighter jet (side view, nose right) + 3px speed lines
+        cv.fill_poly([(cx - 48, cy - 2), (cx + 30, cy - 4), (cx + 58, cy + 1),
+                      (cx + 30, cy + 6), (cx - 48, cy + 6)], (38, 42, 48))
+        cv.fill_poly([(cx - 50, cy - 2), (cx - 38, cy - 15), (cx - 28, cy - 2)],
                      (38, 42, 48))
+        cv.fill_poly([(cx - 12, cy + 4), (cx - 34, cy + 16), (cx - 20, cy + 16),
+                      (cx + 2, cy + 6)], (38, 42, 48))
+        cv.fill_ellipse(cx + 24, cy - 2, 7, 3, (250, 205, 80))
+        for sy in (cy - 6, cy + 1, cy + 8):
+            cv.fill_rect(cx - 72, sy - 1, 16, 3, (38, 42, 48))
     elif key == "chart":
-        cv.line(x + 8, y + h - 10, x + w - 8, y + h - 10, INK_SOFT)
-        cv.line(x + 8, y + 8, x + 8, y + h - 10, INK_SOFT)
-        pts = [(x + 12, y + 16), (x + 34, y + 26), (x + 56, y + 22),
-               (x + 78, y + 34), (x + 100, y + 12)]
-        for i in range(len(pts) - 1):
-            cv.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], RED)
-            cv.line(pts[i][0], pts[i][1] + 1, pts[i + 1][0],
-                    pts[i + 1][1] + 1, RED)
+        # axes + rising trend line (3px) with arrowhead over three bars
+        cv.fill_rect(cx - 70, cy - 13, 3, 26, INK)
+        cv.fill_rect(cx - 70, cy + 10, 140, 3, INK)
+        cv.fill_rect(cx - 58, cy + 2, 12, 8, BLUE)
+        cv.fill_rect(cx - 40, cy - 2, 12, 12, GOLD)
+        cv.fill_rect(cx - 22, cy - 6, 12, 16, BLUE)
+        pts = [(cx - 58, cy - 8), (cx - 36, cy - 12), (cx - 14, cy - 9),
+               (cx + 8, cy - 15), (cx + 36, cy - 17)]
+        stroke3(cv, pts, RED)
+        cv.fill_poly([(cx + 38, cy - 18), (cx + 26, cy - 16), (cx + 34, cy - 8)],
+                     RED)
     elif key == "train":
-        cv.fill_rect(cx - 22, cy - 14, 44, 28, (248, 244, 233))
-        cv.rect(cx - 22, cy - 14, 44, 28, INK, 1)
-        cv.fill_rect(cx - 16, cy - 9, 12, 8, (38, 74, 118))
-        cv.fill_rect(cx + 4, cy - 9, 12, 8, (38, 74, 118))
-        cv.fill_circle(cx, cy + 9, 4, RED)
+        # subway front view: cream body, twin blue windows, gold lights, rail
+        cv.fill_rect(cx - 26, cy - 14, 52, 28, (248, 244, 233))
+        cv.rect(cx - 26, cy - 14, 52, 28, INK, 3)
+        cv.fill_rect(cx - 20, cy - 9, 16, 9, BLUE)
+        cv.fill_rect(cx + 4, cy - 9, 16, 9, BLUE)
+        cv.fill_rect(cx - 1, cy - 9, 3, 9, INK)
+        cv.fill_rect(cx - 20, cy + 2, 40, 3, GOLD)
+        cv.fill_circle(cx - 16, cy + 9, 3, GOLD)
+        cv.fill_circle(cx + 16, cy + 9, 3, GOLD)
+        cv.fill_rect(cx - 34, cy + 16, 68, 3, INK)
     elif key == "flag":
-        cv.fill_rect(cx - 20, cy - 12, 40, 24, (38, 74, 118))
-        # ring of eight small stars
-        for k in range(8):
-            a = k * 3.14159265 / 4.0
-            cv.fill_circle(cx + int(13 * _cos(a)), cy + int(8 * _sin(a)),
-                           2, (250, 205, 80))
-    elif key in ("candle", "memorial"):
-        cv.fill_rect(cx - 4, cy - 2, 8, 16, (248, 244, 233))
-        cv.fill_poly([(cx - 5, cy - 2), (cx, cy - 14), (cx + 5, cy - 2)],
+        # financial document with vector euro sign (no text) + rule lines
+        cv.fill_rect(cx - 28, cy - 14, 56, 28, (248, 244, 233))
+        cv.rect(cx - 28, cy - 14, 56, 28, INK, 3)
+        cv.fill_poly([(cx + 16, cy - 14), (cx + 28, cy - 2), (cx + 28, cy - 14)],
+                     (210, 202, 182))
+        stroke3(cv, [(cx + 16, cy - 14), (cx + 28, cy - 2)], INK)
+        arc = []
+        for k in range(25):
+            a = (55.0 + k * 250.0 / 24.0) * 3.14159265 / 180.0
+            arc.append((cx - 6 + int(round(11 * _cos(a))),
+                        cy - 1 + int(round(11 * _sin(a)))))
+        stroke3(cv, arc, RED)
+        cv.fill_rect(cx - 17, cy - 5, 18, 3, RED)
+        cv.fill_rect(cx - 17, cy + 2, 18, 3, RED)
+        for ly in (cy - 8, cy - 3, cy + 2):
+            cv.fill_rect(cx + 10, ly, 12, 3, INK)
+    elif key == "candle":
+        # solemn memorial wreath (gold leaves, red berries) + flame, Mumbai
+        for k in range(16):
+            a = (300.0 + k * 20.0) * 3.14159265 / 180.0
+            lx = cx + int(round(13 * _cos(a)))
+            ly = cy + 2 + int(round(13 * _sin(a)))
+            cv.fill_circle(lx, ly, 2, GOLD)
+            if k % 2 == 0:
+                cv.fill_circle(lx, ly, 1, RED)
+        cv.fill_poly([(cx - 6, cy - 2), (cx - 3, cy - 13), (cx, cy - 6),
+                      (cx + 3, cy - 16), (cx + 7, cy - 2)], (232, 120, 30))
+        cv.fill_poly([(cx - 3, cy - 2), (cx, cy - 8), (cx + 3, cy - 2)],
                      (250, 205, 80))
-        if key == "memorial":
-            draw_text(cv, cx, cy + 13, "168", 9, True, (250, 205, 80), "c")
+    elif key == "memorial":
+        # high-rise + warning triangle; keeps the v1.1 "168" toll plaque
+        cv.fill_rect(cx - 30, cy - 14, 26, 31, (238, 232, 216))
+        cv.rect(cx - 30, cy - 14, 26, 31, INK, 3)
+        for wy in (cy - 11, cy - 5, cy + 1):
+            for wx in (cx - 27, cx - 20, cx - 13):
+                cv.fill_rect(wx, wy, 3, 3, INK)
+        cv.fill_rect(cx - 28, cy + 7, 22, 9, INK)
+        draw_text(cv, cx - 17, cy + 15, "168", 9, True, (250, 205, 80), "c")
+        cv.fill_rect(cx, cy - 6, 18, 23, (140, 128, 100))
+        cv.rect(cx, cy - 6, 18, 23, INK, 2)
+        for wy in (cy - 3, cy + 3, cy + 9):
+            for wx in (cx + 3, cx + 10):
+                cv.fill_rect(wx, wy, 3, 3, INK)
+        cv.fill_poly([(cx + 14, cy - 16), (cx + 28, cy + 8), (cx, cy + 8)],
+                     (250, 205, 80))
+        stroke3(cv, [(cx + 14, cy - 16), (cx + 28, cy + 8), (cx, cy + 8),
+                     (cx + 14, cy - 16)], INK)
+        cv.fill_rect(cx + 13, cy - 8, 3, 8, INK)
+        cv.fill_circle(cx + 14, cy + 3, 2, INK)
     elif key == "chess":
-        for r in range(4):
-            for c in range(4):
-                if (r + c) % 2 == 0:
-                    cv.fill_rect(cx - 16 + c * 8, cy - 16 + r * 8, 8, 8, INK)
-        cv.fill_circle(cx + 12, cy - 12, 6, RED)
+        # chess knight silhouette (facing right) on a gold base bar:
+        # slim neck, ear spike, long muzzle, concave throat notch so the
+        # head reads apart from the neck at card size
+        cv.fill_poly([(cx - 18, cy + 14), (cx - 15, cy), (cx - 13, cy - 7),
+                      (cx - 19, cy - 11), (cx - 12, cy - 16), (cx - 7, cy - 11),
+                      (cx - 1, cy - 7), (cx + 7, cy - 4), (cx + 14, cy - 1),
+                      (cx + 16, cy + 3), (cx + 11, cy + 6), (cx + 5, cy + 1),
+                      (cx + 3, cy + 14)], INK)
+        cv.fill_circle(cx + 7, cy - 2, 1, (248, 244, 233))
+        cv.fill_rect(cx - 20, cy + 14, 40, 3, GOLD)
     elif key == "bank":
-        cv.fill_poly([(cx - 20, cy - 6), (cx, cy - 16), (cx + 20, cy - 6)],
-                     (120, 100, 70))
-        for i in range(3):
-            cv.fill_rect(cx - 16 + i * 12, cy - 4, 6, 16, (120, 100, 70))
-        cv.fill_rect(cx - 22, cy + 12, 44, 3, (120, 100, 70))
+        # classical bank (ink, high contrast) + red rising-rate arrow
+        cv.fill_poly([(cx - 34, cy - 4), (cx - 6, cy - 15), (cx + 22, cy - 4)],
+                     INK)
+        cv.fill_rect(cx - 32, cy - 4, 52, 3, INK)
+        for colx in (cx - 30, cx - 18, cx - 6, cx + 6):
+            cv.fill_rect(colx, cy, 5, 11, INK)
+        cv.fill_rect(cx - 34, cy + 11, 56, 3, INK)
+        cv.fill_rect(cx - 36, cy + 14, 60, 3, INK)
+        cv.fill_rect(cx + 32, cy - 2, 3, 12, RED)
+        cv.fill_poly([(cx + 28, cy - 2), (cx + 38, cy - 2), (cx + 33, cy - 10)],
+                     RED)
     elif key == "flood":
-        for i, yy in enumerate((cy - 8, cy, cy + 8)):
-            for xx in range(x + 10, x + w - 10, 18):
-                cv.line(xx, yy, xx + 9, yy + 4, BLUE)
-                cv.line(xx + 9, yy + 4, xx + 18, yy, BLUE)
-        cv.fill_poly([(cx - 12, cy - 14), (cx, cy - 20), (cx + 12, cy - 14)],
-                     (120, 100, 70))
+        # twin mountain peaks with snow caps + rescue cross in white disc
+        cv.fill_poly([(cx - 52, cy + 14), (cx - 14, cy - 14), (cx + 18, cy + 14)],
+                     SLATE)
+        cv.fill_poly([(cx - 14, cy - 14), (cx - 19, cy - 6), (cx - 9, cy - 6)],
+                     (248, 244, 233))
+        cv.fill_poly([(cx - 16, cy + 14), (cx + 12, cy - 6), (cx + 38, cy + 14)],
+                     INK)
+        cv.fill_poly([(cx + 12, cy - 6), (cx + 7, cy), (cx + 17, cy)],
+                     (248, 244, 233))
+        cv.fill_circle(cx + 44, cy + 6, 9, (255, 255, 255))
+        cv.fill_rect(cx + 43, cy - 1, 3, 14, RED)
+        cv.fill_rect(cx + 37, cy + 5, 14, 3, RED)
 
 
 def _cos(a):
@@ -716,7 +810,7 @@ CONTINENTS = [
 
 # (num, lon, lat, label dx, label dy) — label offsets keep Europe readable
 PINS = [
-    (1, -77.0, 38.9, -14, -12),
+    (1, -77.0, 38.9, -20, -14),
     (2, 50.2, 26.6, 10, -10),
     (3, -74.0, 40.7, -14, 8),
     (4, 31.2, 30.0, 8, 10),
@@ -724,8 +818,8 @@ PINS = [
     (6, -74.0, 40.7, 12, -10),
     (7, -0.1, 51.5, -22, -12),
     (8, 4.4, 50.8, 16, -16),
-    (9, 72.9, 19.1, 12, -4),
-    (10, 6.1, 46.2, 18, 14),
+    (9, 72.9, 19.1, 18, -8),
+    (10, 6.1, 46.2, 8, 22),
     (11, 127.0, 37.6, 10, -10),
     (12, 114.2, 22.3, 10, 8),
     (13, 85.3, 27.7, -16, 14),
@@ -747,12 +841,17 @@ def draw_map(cv, x, y, w, h):
         for i in range(len(pts)):
             x0, y0 = pts[i]
             x1, y1 = pts[(i + 1) % len(pts)]
+            # 2px coastline: two parallel 1px strokes
             cv.line(int(x0), int(y0), int(x1), int(y1), LAND_LINE)
+            cv.line(int(x0), int(y0) + 1, int(x1), int(y1) + 1, LAND_LINE)
     for (num, lon, lat, dx, dy) in PINS:
         px, py = proj(lon, lat)
         lx, ly = int(px + dx), int(py + dy)
         cv.line(int(px), int(py), lx, ly, RED_DK)
         cv.fill_circle(int(px), int(py), 2, RED_DK)
+        # crisp pin: dark outer ring + white ring + red core, white number
+        cv.fill_circle(lx, ly, 9, RED_DK)
+        cv.fill_circle(lx, ly, 8, (255, 255, 255))
         cv.fill_circle(lx, ly, 7, RED)
         draw_text(cv, lx, ly + 3, str(num), 8, True, (255, 255, 255), "c")
 
