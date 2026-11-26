@@ -556,10 +556,25 @@ def scene_refinery(cv, x, y, w, h):
     cv.fill_rect(x, y, w, 26, (226, 148, 74))
     cv.fill_rect(x, y + 26, w, 26, (198, 96, 52))
     cv.fill_rect(x, y + 52, w, h - 52, (74, 48, 52))
-    # smoke plume: small, darker, rising puffs (not balloons)
-    for (sx, sy, sr, col) in [(150, 30, 10, (100, 96, 90)),
-                              (166, 20, 13, (120, 116, 110)),
-                              (188, 12, 16, (140, 136, 130))]:
+    # smoke plume: one connected, irregular mass rising from the tanks —
+    # wobbly polygon base + layered puffs, dark at the root, pale at the
+    # top, so it reads as smoke, not separate balloons
+    cv.fill_poly([(x + 136, y + 56), (x + 130, y + 46), (x + 134, y + 36),
+                  (x + 128, y + 28), (x + 136, y + 20), (x + 140, y + 14),
+                  (x + 150, y + 10), (x + 160, y + 4), (x + 172, y + 2),
+                  (x + 184, y + 4), (x + 196, y + 8), (x + 204, y + 12),
+                  (x + 210, y + 18), (x + 206, y + 26), (x + 212, y + 32),
+                  (x + 202, y + 40), (x + 192, y + 46), (x + 180, y + 50),
+                  (x + 164, y + 54), (x + 150, y + 58)], (128, 124, 118))
+    for (sx, sy, sr, col) in [(142, 48, 7, (98, 94, 88)),
+                              (158, 52, 6, (104, 100, 94)),
+                              (170, 50, 6, (100, 96, 90)),
+                              (150, 34, 9, (120, 116, 110)),
+                              (168, 26, 10, (134, 130, 124)),
+                              (186, 20, 9, (142, 138, 132)),
+                              (172, 12, 10, (150, 146, 140)),
+                              (192, 11, 10, (156, 152, 146)),
+                              (200, 16, 7, (150, 146, 140))]:
         cv.fill_circle(x + sx, y + sy, sr, col)
     # towers and tanks
     cv.fill_rect(x + 24, y + 34, 14, h - 34, (38, 34, 36))
