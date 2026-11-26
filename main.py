@@ -525,28 +525,25 @@ def draw_pill(cv, x, y, label, size=8):
 
 # ---- schematic scenes for the three leads (drawn in code, flat vector)
 def scene_tariffs(cv, x, y, w, h):
-    cv.fill_rect(x, y, w, h, (214, 226, 236))
-    cv.fill_rect(x, y + h - 16, w, 16, (58, 96, 130))  # sea band
-    # container ship, left
-    hx, hy = x + 16, y + h - 34
-    cv.fill_poly([(hx, hy), (hx + 108, hy), (hx + 96, hy + 14),
-                  (hx + 10, hy + 14)], (26, 24, 20))
-    for i, cc in enumerate([(172, 32, 28), (46, 90, 136), (176, 132, 40)]):
-        cv.fill_rect(hx + 14 + i * 30, hy - 20, 26, 20, cc)
-        cv.rect(hx + 14 + i * 30, hy - 20, 26, 20, INK, 1)
-    cv.fill_rect(hx + 96, hy - 34, 4, 34, INK)
-    cv.fill_rect(hx + 88, hy - 38, 20, 4, INK)
-    # tariff bars, right: India 25 / Japan 15 / China 20
-    bx = x + w - 128
+    # v1.5: clean chart panel as the focus — the container ship crowded the
+    # chart and told the wrong story, so it is dropped; 3 proportional bars
+    # (India 25 red, Japan 15 gold, China 20 blue) carry the tariff story
+    cv.fill_rect(x, y, w, h, (238, 232, 216))
+    cv.fill_rect(x, y + h - 16, w, 16, (214, 226, 236))
     base = y + h - 16
     bars = [("INDIA", 25, RED), ("JAPAN", 15, GOLD), ("CHINA", 20, BLUE)]
+    bw, gap = 40, 24
+    bx = x + 118 + (200 - (3 * bw + 2 * gap)) // 2
     for i, (lab, val, col) in enumerate(bars):
-        bh = int(val * 1.9)
-        xx = bx + i * 42
-        cv.fill_rect(xx, base - bh, 30, bh, col)
-        cv.rect(xx, base - bh, 30, bh, INK, 1)
-        draw_text(cv, xx + 15, base - bh - 4, "%d%%" % val, 11, True, INK, "c")
-        draw_text(cv, xx + 15, base + 12, lab, 8, True, INK, "c")
+        bh = int(val * 1.28)
+        xx = bx + i * (bw + gap)
+        cv.fill_rect(xx, base - bh, bw, bh, col)
+        cv.rect(xx, base - bh, bw, bh, INK, 1)
+        draw_text(cv, xx + bw // 2, base - bh - 4, "%d%%" % val, 11, True,
+                  INK, "c")
+        draw_text(cv, xx + bw // 2, base + 12, lab, 8, True, INK, "c")
+    cv.fill_rect(bx - 8, y + 20, 3, base - y - 20, INK)  # vertical axis
+    cv.fill_rect(x, base, w, 3, INK)  # baseline
     cv.fill_rect(x + 4, y + 4, 96, 15, INK)
     draw_text(cv, x + 8, y + 15, "USTR PROPOSAL", 9, True, (255, 255, 255))
 
@@ -556,33 +553,49 @@ def scene_refinery(cv, x, y, w, h):
     cv.fill_rect(x, y, w, 26, (226, 148, 74))
     cv.fill_rect(x, y + 26, w, 26, (198, 96, 52))
     cv.fill_rect(x, y + 52, w, h - 52, (74, 48, 52))
-    # smoke plume, variant A (winner): a rising column of heavily
-    # overlapping ellipses — narrow dark root over the tanks, widening and
-    # paling as it climbs, drifting slightly right; no single disc reads
-    # alone, silhouette is vertical so it reads as smoke going up
-    for (sx, sy, rx, ry, col) in [(147, 57, 6, 4, (98, 94, 88)),
-                                  (149, 51, 7, 5, (102, 98, 92)),
-                                  (152, 45, 8, 5, (108, 104, 98)),
-                                  (155, 39, 9, 5, (116, 112, 106)),
-                                  (158, 33, 10, 6, (124, 120, 114)),
-                                  (161, 27, 11, 6, (132, 128, 122)),
-                                  (165, 21, 11, 6, (140, 136, 130)),
-                                  (168, 15, 10, 6, (147, 143, 137)),
-                                  (171, 10, 9, 5, (153, 149, 143)),
-                                  (173, 5, 7, 4, (158, 154, 148))]:
+    # v1.5: clearer structures — distillation tower (left), storage tanks
+    # (mid), flare stack with flame (right), second stack, connecting pipe,
+    # and TWO rising smoke columns (v1.4 lesson: vertical, narrow dark
+    # root, widening and paling upward, no whole discs, no horizontal blob)
+    # smoke plume A over the mid vent stack, drifting left — v1.5 fix:
+    # lumpy rx (6,8,6,9,7,10,8) so the silhouette edge waves instead of
+    # reading as a straight grey bar; wider max rx for a billowing column
+    for (sx, sy, rx, ry, col) in [(150, 44, 6, 4, (98, 94, 88)),
+                                  (148, 38, 8, 5, (104, 100, 94)),
+                                  (150, 32, 6, 5, (112, 108, 102)),
+                                  (147, 26, 9, 5, (120, 116, 110)),
+                                  (149, 20, 7, 5, (128, 124, 118)),
+                                  (146, 14, 10, 5, (138, 134, 128)),
+                                  (147, 8, 8, 4, (148, 144, 138)),
+                                  (145, 4, 7, 3, (156, 152, 146))]:
         cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
-    # towers and tanks
-    cv.fill_rect(x + 24, y + 34, 14, h - 34, (38, 34, 36))
-    cv.fill_rect(x + 44, y + 44, 12, h - 44, (38, 34, 36))
-    cv.fill_rect(x + 62, y + 28, 16, h - 28, (38, 34, 36))
-    cv.fill_circle(x + 120, y + h - 18, 16, (52, 46, 48))
-    cv.fill_circle(x + 158, y + h - 14, 12, (52, 46, 48))
-    cv.fill_rect(x + 200, y + 40, 12, h - 40, (38, 34, 36))
-    cv.fill_rect(x + 216, y + 52, 40, h - 52, (38, 34, 36))
-    # flame, larger so it reads over the towers
-    fx, fy = x + 70, y + 28
-    cv.fill_poly([(fx - 11, fy), (fx, fy - 26), (fx + 11, fy)], (232, 120, 30))
-    cv.fill_poly([(fx - 6, fy), (fx, fy - 16), (fx + 6, fy)], (250, 205, 80))
+    # smoke plume B over the second stack, drifting right
+    for (sx, sy, rx, ry, col) in [(264, 30, 6, 4, (98, 94, 88)),
+                                  (266, 24, 8, 4, (106, 102, 96)),
+                                  (264, 18, 6, 5, (114, 110, 104)),
+                                  (267, 12, 9, 5, (124, 120, 114)),
+                                  (265, 6, 8, 4, (134, 130, 124))]:
+        cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
+    # distillation tower with platforms
+    cv.fill_rect(x + 18, y + 16, 14, h - 16, (38, 34, 36))
+    for py in (26, 36, 46):
+        cv.fill_rect(x + 14, y + py, 22, 2, (120, 116, 110))
+    # mid vent stack
+    cv.fill_rect(x + 148, y + 44, 5, h - 44, (38, 34, 36))
+    # storage tanks with highlight bands
+    cv.fill_circle(x + 88, y + h - 14, 13, (52, 46, 48))
+    cv.fill_circle(x + 116, y + h - 12, 11, (52, 46, 48))
+    cv.fill_rect(x + 81, y + h - 22, 14, 2, (120, 116, 110))
+    cv.fill_rect(x + 110, y + h - 20, 12, 2, (120, 116, 110))
+    # flare stack + flame
+    cv.fill_rect(x + 206, y + 20, 8, h - 20, (38, 34, 36))
+    fx, fy = x + 210, y + 20
+    cv.fill_poly([(fx - 6, fy), (fx, fy - 14), (fx + 6, fy)], (232, 120, 30))
+    cv.fill_poly([(fx - 3, fy), (fx, fy - 8), (fx + 3, fy)], (250, 205, 80))
+    # second stack (feeds plume B)
+    cv.fill_rect(x + 260, y + 30, 8, h - 30, (38, 34, 36))
+    # connecting pipe, tower -> tanks
+    cv.fill_rect(x + 32, y + h - 24, 44, 3, (38, 34, 36))
     cv.fill_rect(x + 4, y + 4, 104, 15, INK)
     draw_text(cv, x + 8, y + 15, "550,000 BPD", 9, True, (255, 255, 255))
 
@@ -592,22 +605,62 @@ def scene_parade(cv, x, y, w, h):
     cv.fill_rect(x, y, w, 30, (96, 104, 116))
     cv.fill_rect(x, y + 30, w, 26, (72, 80, 92))
     cv.fill_rect(x, y + 56, w, h - 56, (52, 58, 66))
-    # rain dashes
+    # wind-driven rain, slanted hard sideways
     for rx in range(14, w, 26):
         for ry in range(6, 52, 14):
-            cv.line(x + rx, y + ry, x + rx - 5, y + ry + 8, (200, 206, 214))
-    # Manhattan skyline
-    heights = [34, 52, 40, 62, 30, 48, 56, 36, 44, 28]
+            cv.line(x + rx, y + ry, x + rx - 9, y + ry + 6, (200, 206, 214))
+    # wind streaks
+    for (sx, sy, ln) in [(130, 12, 60), (230, 22, 60), (30, 46, 50)]:
+        cv.fill_rect(x + sx, y + sy, ln, 2, (220, 226, 232))
+    # Manhattan skyline, low background only (not the main motif)
+    heights = [16, 24, 18, 28, 14, 22, 26, 18, 20, 14]
     bx = x + 8
     for i, hh in enumerate(heights):
         cv.fill_rect(bx + i * 30, y + h - hh, 24, hh, (26, 24, 20))
-        for wy in range(6, hh - 6, 12):
-            cv.fill_rect(bx + i * 30 + 5, y + h - hh + wy, 4, 5, (250, 205, 80))
-    # sagging deflated balloon: round envelope + darker fold band + ropes
-    cv.fill_ellipse(x + 190, y + 26, 42, 22, (172, 32, 28))
-    cv.fill_ellipse(x + 190, y + 38, 30, 8, (140, 24, 22))
-    cv.line(x + 158, y + 42, x + 148, y + 60, (26, 24, 20))
-    cv.line(x + 222, y + 42, x + 232, y + 60, (26, 24, 20))
+        for wy in range(5, hh - 4, 10):
+            cv.fill_rect(bx + i * 30 + 5, y + h - hh + wy, 3, 4,
+                         (250, 205, 80))
+    # big balloon, tilted by the wind (top leaning right) — the parade
+    # motif. v1.5 fix: rounder (rx 40, ry 26) — the first version was so
+    # flat (48x20) it read as a leaf/disc, not a balloon
+    bcx, bcy = x + 170, y + 30
+    t = 0.28
+    ct, st = _cos(t), _sin(t)
+    pts = []
+    for k in range(28):
+        a = k * 2 * 3.14159265 / 28.0
+        ca, sa = _cos(a), _sin(a)
+        px = bcx + 40 * ca * ct - 26 * sa * st
+        py = bcy + 40 * ca * st + 26 * sa * ct
+        pts.append((int(round(px)), int(round(py))))
+    cv.fill_poly(pts, (172, 32, 28))
+    # darker fold band across the balloon belly
+    pts2 = []
+    for k in range(28):
+        a = k * 2 * 3.14159265 / 28.0
+        ca, sa = _cos(a), _sin(a)
+        px = bcx + 4 + 28 * ca * ct - 9 * sa * st
+        py = bcy + 10 + 28 * ca * st + 9 * sa * ct
+        pts2.append((int(round(px)), int(round(py))))
+    cv.fill_poly(pts2, (140, 24, 22))
+    # ropes trailing down-left from the balloon (kept inside the scene box)
+    cv.line(bcx - 26, bcy + 16, bcx - 40, bcy + 36, (26, 24, 20))
+    cv.line(bcx + 18, bcy + 18, bcx + 6, bcy + 38, (26, 24, 20))
+    # confetti blown sideways
+    for (ccx, ccy, col) in [(230, 10, GOLD), (250, 16, (250, 205, 80)),
+                            (280, 12, BLUE), (300, 20, (248, 244, 233)),
+                            (270, 30, GOLD), (300, 34, (250, 205, 80)),
+                            (240, 40, RED), (130, 44, GOLD),
+                            (100, 50, RED), (290, 46, BLUE)]:
+        cv.fill_rect(x + ccx, y + ccy, 5, 2, col)
+    # parade float (platform + flags) bottom right
+    cv.fill_rect(x + 238, y + h - 12, 64, 8, (26, 24, 20))
+    cv.fill_rect(x + 244, y + h - 26, 3, 14, (26, 24, 20))
+    cv.fill_poly([(x + 247, y + h - 26), (x + 259, y + h - 23),
+                  (x + 247, y + h - 20)], RED)
+    cv.fill_rect(x + 286, y + h - 26, 3, 14, (26, 24, 20))
+    cv.fill_poly([(x + 289, y + h - 26), (x + 301, y + h - 23),
+                  (x + 289, y + h - 20)], GOLD)
     cv.fill_rect(x + 4, y + 4, 118, 15, INK)
     draw_text(cv, x + 8, y + 15, "100TH · SAT 08:30", 9, True, (255, 255, 255))
 
@@ -641,10 +694,17 @@ def draw_icon(cv, x, y, w, h, key):
     cv.fill_rect(x, y, w, h, bg)
     cx, cy = x + w // 2, y + h // 2
     if key == "flame":
-        # tanker truck (side view, facing right) with flame over the tank
-        cv.fill_poly([(cx - 40, cy + 1), (cx - 36, cy - 12), (cx - 32, cy - 5),
-                      (cx - 28, cy - 16), (cx - 22, cy + 1)], (232, 120, 30))
-        cv.fill_poly([(cx - 35, cy + 1), (cx - 32, cy - 7), (cx - 28, cy + 1)],
+        # v1.5: road fuel tanker with fire + smoke on a highway
+        cv.fill_rect(x, cy + 13, w, 6, (38, 34, 36))  # road band
+        cv.fill_rect(x, cy + 15, w, 1, (248, 244, 233))  # centre line
+        # smoke puffs rising from the flame (inside the box)
+        cv.fill_ellipse(cx - 31, cy - 12, 3, 2, (120, 116, 110))
+        cv.fill_ellipse(cx - 30, cy - 15, 3, 2, (140, 136, 130))
+        cv.fill_ellipse(cx - 28, cy - 17, 2, 1, (158, 154, 148))
+        # flame over the tank (smaller than v1.2 so the smoke fits above)
+        cv.fill_poly([(cx - 40, cy + 1), (cx - 36, cy - 8), (cx - 32, cy - 4),
+                      (cx - 28, cy - 10), (cx - 22, cy + 1)], (232, 120, 30))
+        cv.fill_poly([(cx - 35, cy + 1), (cx - 32, cy - 5), (cx - 28, cy + 1)],
                      (250, 205, 80))
         cv.fill_rect(cx - 52, cy + 1, 54, 12, (248, 244, 233))
         cv.rect(cx - 52, cy + 1, 54, 12, INK, 3)
@@ -666,20 +726,37 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_ellipse(cx + 24, cy - 2, 7, 3, (250, 205, 80))
         for sy in (cy - 6, cy + 1, cy + 8):
             cv.fill_rect(cx - 72, sy - 1, 16, 3, (38, 42, 48))
+        # strike burst at the nose (the Kyiv strike)
+        bx, by = cx + 64, cy + 1
+        burst = []
+        for k in range(12):
+            a = k * 3.14159265 / 6.0
+            r = 9 if k % 2 == 0 else 4
+            burst.append((bx + int(round(r * _cos(a))),
+                          by + int(round(r * _sin(a)))))
+        cv.fill_poly(burst, (232, 120, 30))
+        cv.fill_circle(bx, by, 3, (250, 205, 80))
     elif key == "chart":
-        # axes + rising trend line (3px) with arrowhead over three bars
+        # v1.5: axes + bars + a line that PLUNGES then RECOVERS (V / dip and
+        # rise) — v1.2 only rose, which was wrong for the Nasdaq story
         cv.fill_rect(cx - 70, cy - 13, 3, 26, INK)
         cv.fill_rect(cx - 70, cy + 10, 140, 3, INK)
-        cv.fill_rect(cx - 58, cy + 2, 12, 8, BLUE)
-        cv.fill_rect(cx - 40, cy - 2, 12, 12, GOLD)
+        cv.fill_rect(cx - 58, cy - 4, 12, 14, BLUE)
+        cv.fill_rect(cx - 40, cy + 5, 12, 5, GOLD)
         cv.fill_rect(cx - 22, cy - 6, 12, 16, BLUE)
-        pts = [(cx - 58, cy - 8), (cx - 36, cy - 12), (cx - 14, cy - 9),
-               (cx + 8, cy - 15), (cx + 36, cy - 17)]
+        pts = [(cx - 58, cy - 12), (cx - 36, cy + 6), (cx - 14, cy - 4),
+               (cx + 8, cy - 12), (cx + 36, cy - 16)]
         stroke3(cv, pts, RED)
-        cv.fill_poly([(cx + 38, cy - 18), (cx + 26, cy - 16), (cx + 34, cy - 8)],
+        cv.fill_poly([(cx + 38, cy - 17), (cx + 26, cy - 15), (cx + 34, cy - 7)],
                      RED)
     elif key == "train":
-        # subway front view: cream body, twin blue windows, gold lights, rail
+        # v1.5: subway front view + London Underground roundel (left) and a
+        # closed crossing barrier (right) — the strike halting service
+        # roundel: paper ring, red disc, blue bar (shapes, no text)
+        cv.fill_circle(cx - 56, cy - 2, 9, (248, 244, 233))
+        cv.fill_circle(cx - 56, cy - 2, 6, RED)
+        cv.fill_rect(cx - 68, cy - 4, 24, 4, BLUE)
+        # train body
         cv.fill_rect(cx - 26, cy - 14, 52, 28, (248, 244, 233))
         cv.rect(cx - 26, cy - 14, 52, 28, INK, 3)
         cv.fill_rect(cx - 20, cy - 9, 16, 9, BLUE)
@@ -689,6 +766,12 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_circle(cx - 16, cy + 9, 3, GOLD)
         cv.fill_circle(cx + 16, cy + 9, 3, GOLD)
         cv.fill_rect(cx - 34, cy + 16, 68, 3, INK)
+        # closed barrier across the track, right of the train
+        cv.fill_rect(cx + 40, cy + 6, 3, 10, INK)
+        cv.fill_rect(cx + 66, cy + 6, 3, 10, INK)
+        for i in range(5):
+            col = (248, 244, 233) if i % 2 == 0 else INK
+            cv.fill_rect(cx + 43 + i * 5, cy + 8, 5, 4, col)
     elif key == "flag":
         # financial document with vector euro sign (no text) + rule lines
         cv.fill_rect(cx - 28, cy - 14, 56, 28, (248, 244, 233))
@@ -706,21 +789,42 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(cx - 17, cy + 2, 18, 3, RED)
         for ly in (cy - 8, cy - 3, cy + 2):
             cv.fill_rect(cx + 10, ly, 12, 3, INK)
+        # balance scale (loan negotiation) right of the document
+        cv.fill_rect(cx + 52, cy - 10, 3, 22, INK)
+        cv.fill_rect(cx + 38, cy - 10, 30, 3, INK)
+        cv.fill_rect(cx + 48, cy + 12, 8, 3, INK)
+        cv.line(cx + 38, cy - 7, cx + 40, cy - 1, INK)
+        cv.line(cx + 68, cy - 7, cx + 66, cy - 1, INK)
+        cv.fill_poly([(cx + 36, cy - 1), (cx + 44, cy - 1), (cx + 40, cy + 5)],
+                     GOLD)
+        cv.fill_poly([(cx + 62, cy - 1), (cx + 70, cy - 1), (cx + 66, cy + 5)],
+                     GOLD)
     elif key == "candle":
-        # solemn memorial wreath (gold leaves, red berries) + flame, Mumbai
-        for k in range(16):
-            a = (300.0 + k * 20.0) * 3.14159265 / 180.0
+        # v1.5: solemn memorial wreath with REAL leaf shapes (v1.2 leaves
+        # were 2px dots that read as beads) + flame, Mumbai
+        for k in range(12):
+            a = k * 30.0 * 3.14159265 / 180.0
             lx = cx + int(round(13 * _cos(a)))
             ly = cy + 2 + int(round(13 * _sin(a)))
-            cv.fill_circle(lx, ly, 2, GOLD)
-            if k % 2 == 0:
-                cv.fill_circle(lx, ly, 1, RED)
+            # leaf: pointed diamond, long axis tangent to the ring
+            tx, ty = -_sin(a), _cos(a)
+            rx, ry = _cos(a), _sin(a)
+            cv.fill_poly([(int(round(lx + tx * 4)), int(round(ly + ty * 4))),
+                          (int(round(lx + rx * 2)), int(round(ly + ry * 2))),
+                          (int(round(lx - tx * 4)), int(round(ly - ty * 4))),
+                          (int(round(lx - rx * 2)), int(round(ly - ry * 2)))],
+                         GOLD)
+        for k in range(6):
+            a = (15.0 + k * 60.0) * 3.14159265 / 180.0
+            cv.fill_circle(cx + int(round(13 * _cos(a))),
+                           cy + 2 + int(round(13 * _sin(a))), 1, RED)
         cv.fill_poly([(cx - 6, cy - 2), (cx - 3, cy - 13), (cx, cy - 6),
                       (cx + 3, cy - 16), (cx + 7, cy - 2)], (232, 120, 30))
         cv.fill_poly([(cx - 3, cy - 2), (cx, cy - 8), (cx + 3, cy - 2)],
                      (250, 205, 80))
     elif key == "memorial":
-        # high-rise + warning triangle; keeps the v1.1 "168" toll plaque
+        # v1.5: high-rise on fire + "168" toll plaque (memorial, distinct
+        # from the Mumbai wreath); keeps the v1.1 "168" plaque text
         cv.fill_rect(cx - 30, cy - 14, 26, 31, (238, 232, 216))
         cv.rect(cx - 30, cy - 14, 26, 31, INK, 3)
         for wy in (cy - 11, cy - 5, cy + 1):
@@ -733,12 +837,12 @@ def draw_icon(cv, x, y, w, h, key):
         for wy in (cy - 3, cy + 3, cy + 9):
             for wx in (cx + 3, cx + 10):
                 cv.fill_rect(wx, wy, 3, 3, INK)
-        cv.fill_poly([(cx + 14, cy - 16), (cx + 28, cy + 8), (cx, cy + 8)],
+        # v1.5: fire on the second tower's roof (the Hong Kong fire) —
+        # the v1.2 warning triangle is removed (awkward/confusing symbol)
+        cv.fill_poly([(cx + 3, cy - 6), (cx + 6, cy - 16), (cx + 9, cy - 11),
+                      (cx + 12, cy - 18), (cx + 15, cy - 6)], (232, 120, 30))
+        cv.fill_poly([(cx + 6, cy - 6), (cx + 8, cy - 12), (cx + 10, cy - 6)],
                      (250, 205, 80))
-        stroke3(cv, [(cx + 14, cy - 16), (cx + 28, cy + 8), (cx, cy + 8),
-                     (cx + 14, cy - 16)], INK)
-        cv.fill_rect(cx + 13, cy - 8, 3, 8, INK)
-        cv.fill_circle(cx + 14, cy + 3, 2, INK)
     elif key == "chess":
         # chess knight silhouette (facing right) on a gold base bar:
         # slim neck, ear spike, long muzzle, concave throat notch so the
@@ -750,6 +854,12 @@ def draw_icon(cv, x, y, w, h, key):
                       (cx + 3, cy + 14)], INK)
         cv.fill_circle(cx + 7, cy - 2, 1, (248, 244, 233))
         cv.fill_rect(cx - 20, cy + 14, 40, 3, GOLD)
+        # chessboard 3x3 at the right (the world title match)
+        cv.rect(cx + 32, cy - 12, 26, 26, INK, 2)
+        for r in range(3):
+            for c in range(3):
+                col = INK if (r + c) % 2 == 0 else (248, 244, 233)
+                cv.fill_rect(cx + 34 + c * 8, cy - 10 + r * 8, 8, 8, col)
     elif key == "bank":
         # classical bank (ink, high contrast) + red rising-rate arrow
         cv.fill_poly([(cx - 34, cy - 4), (cx - 6, cy - 15), (cx + 22, cy - 4)],
@@ -759,11 +869,14 @@ def draw_icon(cv, x, y, w, h, key):
             cv.fill_rect(colx, cy, 5, 11, INK)
         cv.fill_rect(cx - 34, cy + 11, 56, 3, INK)
         cv.fill_rect(cx - 36, cy + 14, 60, 3, INK)
-        cv.fill_rect(cx + 32, cy - 2, 3, 12, RED)
-        cv.fill_poly([(cx + 28, cy - 2), (cx + 38, cy - 2), (cx + 33, cy - 10)],
-                     RED)
+        # v1.5: stepped rising-rate line right of the bank (the rate hike)
+        stroke3(cv, [(cx + 30, cy + 6), (cx + 30, cy - 2), (cx + 42, cy - 2),
+                     (cx + 42, cy - 10), (cx + 54, cy - 10)], RED)
+        cv.fill_poly([(cx + 62, cy - 10), (cx + 52, cy - 15),
+                      (cx + 52, cy - 5)], RED)
     elif key == "flood":
-        # twin mountain peaks with snow caps + rescue cross in white disc
+        # v1.5: layered mountain terrain (three ridges) + rescue cross —
+        # the front ridge makes the disaster terrain read, not just triangles
         cv.fill_poly([(cx - 52, cy + 14), (cx - 14, cy - 14), (cx + 18, cy + 14)],
                      SLATE)
         cv.fill_poly([(cx - 14, cy - 14), (cx - 19, cy - 6), (cx - 9, cy - 6)],
@@ -772,6 +885,8 @@ def draw_icon(cv, x, y, w, h, key):
                      INK)
         cv.fill_poly([(cx + 12, cy - 6), (cx + 7, cy), (cx + 17, cy)],
                      (248, 244, 233))
+        cv.fill_poly([(cx - 52, cy + 14), (cx - 30, cy + 4), (cx - 8, cy + 14),
+                      (cx + 12, cy + 8), (cx + 30, cy + 14)], (72, 66, 60))
         cv.fill_circle(cx + 44, cy + 6, 9, (255, 255, 255))
         cv.fill_rect(cx + 43, cy - 1, 3, 14, RED)
         cv.fill_rect(cx + 37, cy + 5, 14, 3, RED)
