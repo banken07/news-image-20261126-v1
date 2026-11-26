@@ -22,7 +22,8 @@ SS = 3  # text supersampling factor
 PAPER = (248, 244, 233)
 PAPER_DIM = (242, 236, 220)
 INK = (26, 24, 20)
-INK_SOFT = (74, 70, 60)
+INK_SOFT = (58, 56, 50)  # v1.1: darkened from (74, 70, 60) — sub-copy contrast
+# vs PAPER 8.56 -> 10.67; same glyphs/advances, so no wrap or layout moves
 RED = (172, 32, 28)
 RED_DK = (140, 24, 22)
 RULE = (26, 24, 20)
@@ -271,20 +272,23 @@ def _glyph_mask(ch, size, bold):
     return res
 
 
-def text_width(s, size, bold=False):
+def text_width(s, size, bold=False, space_extra=0.0):
     table = glyphs.BOLD if bold else glyphs.REG
     total = 0.0
     for ch in s:
         entry = table.get(ch) or glyphs.REG.get("?", (1000, []))
         total += entry[0] * size / float(glyphs.UPM)
+        if ch == " ":
+            total += space_extra
     return total
 
 
-def draw_text(cv, x, y_base, s, size, bold=False, color=INK, align="l"):
+def draw_text(cv, x, y_base, s, size, bold=False, color=INK, align="l",
+              space_extra=0.0):
     """Draw text with baseline at y_base. align: l (left), c (centre), r."""
     if not s:
         return
-    w = text_width(s, size, bold)
+    w = text_width(s, size, bold, space_extra)
     if align == "c":
         x = x - w / 2.0
     elif align == "r":
@@ -313,25 +317,26 @@ def draw_text(cv, x, y_base, s, size, bold=False, color=INK, align="l"):
                     cv.px[i] = (color[0] * a + cv.px[i] * inv) // (SS * SS)
                     cv.px[i + 1] = (color[1] * a + cv.px[i + 1] * inv) // (SS * SS)
                     cv.px[i + 2] = (color[2] * a + cv.px[i + 2] * inv) // (SS * SS)
-        pen += adv
+        pen += adv + (space_extra if ch == " " else 0.0)
 
 
-def wrap_text(s, size, bold, maxw):
+def wrap_text(s, size, bold, maxw, space_extra=0.0):
     """Greedy word wrap. Returns list of lines; hard-splits overlong words."""
     words = s.split(" ")
     lines = []
     cur = ""
     for word in words:
         trial = word if not cur else cur + " " + word
-        if text_width(trial, size, bold) <= maxw:
+        if text_width(trial, size, bold, space_extra) <= maxw:
             cur = trial
             continue
         if cur:
             lines.append(cur)
         # hard-split the word itself if it alone is too wide
-        while text_width(word, size, bold) > maxw:
+        while text_width(word, size, bold, space_extra) > maxw:
             cut = len(word)
-            while cut > 1 and text_width(word[:cut], size, bold) > maxw:
+            while cut > 1 and text_width(word[:cut], size, bold,
+                                         space_extra) > maxw:
                 cut -= 1
             lines.append(word[:cut])
             word = word[cut:]
@@ -342,17 +347,19 @@ def wrap_text(s, size, bold, maxw):
 
 
 def draw_lines(cv, x, y_top, lines, size, leading, bold=False, color=INK,
-               align="l", maxw=None):
+               align="l", maxw=None, space_extra=0.0):
     """Draw wrapped lines; y_top is the top of the first line's em box."""
     asc = int(size * 0.82) + 1
     for i, ln in enumerate(lines):
         yb = y_top + asc + i * leading
         if align == "c":
-            draw_text(cv, x + (maxw or 0) / 2.0, yb, ln, size, bold, color, "c")
+            draw_text(cv, x + (maxw or 0) / 2.0, yb, ln, size, bold, color,
+                      "c", space_extra)
         elif align == "r":
-            draw_text(cv, x + (maxw or 0), yb, ln, size, bold, color, "r")
+            draw_text(cv, x + (maxw or 0), yb, ln, size, bold, color, "r",
+                      space_extra)
         else:
-            draw_text(cv, x, yb, ln, size, bold, color, "l")
+            draw_text(cv, x, yb, ln, size, bold, color, "l", space_extra)
     return y_top + asc + (len(lines) - 1) * leading + int(size * 0.24)
 
 
@@ -411,7 +418,7 @@ LEADS = [
 SMALL = [
     (4, "CAIRO · DISASTER", "OFFICIAL", "Cairo tanker fire kills 31",
      "Fuel tanker overturns on the Ring Road, Wed evening; 21 hurt, 27 "
-     "vehicles charred. Toll is preliminary.", "flame"),
+     "vehicles charred; toll is preliminary.", "flame"),
     (5, "KYIV · CONFLICT", "REPORTED", "Ukraine hits 5 jets; Kyiv struck",
      "Savasleyka airbase hit — 3 MiG-31s, 2 Su-34s. Russia hits Kyiv "
      "shopping centre; 2 Samara refineries struck.", "jet"),
@@ -447,7 +454,7 @@ ALSO = [
     "Asia rebounds: Nikkei +1.6% as tariffs look milder; Shanghai −2.1%",
     "Brent $94.61 (+3.5%); WTI $83.68 (+2%) as Gulf fears lift oil",
     "Trump, Rutte urge Russia not to widen the war (Mar-a-Lago talks)",
-    "ECB: Pablo Hernández de Cos set to succeed Lagarde",
+    "ECB: Pablo Hernandez de Cos set to succeed Lagarde",
     "Abrego Garcia reaches Spain after a 20-month US legal fight",
     "Brazil withdraws ambassador to Argentina for good",
     "Hasina return dispute: India separates return from extradition",
@@ -461,7 +468,7 @@ ALSO = [
     "Canadian astronaut welcomes a baby girl from orbit",
     "Pig-kidney patient marks one year off dialysis",
     "Famine risk falls in Baidoa, Somalia — but hunger persists",
-    "US Army calls Iowa 5-ton blast a ‘huge success’",
+    "US Army calls Iowa 5-ton blast a 'huge success'",
     "Kurtley Beale returns to the Wallabies after five years",
     "Gordon Ramsay to host revived Top Gear",
     "U-17 World Cup: Egypt 4–1 Panama; Uganda 6–0 New Caledonia",
@@ -498,10 +505,12 @@ MORE_CHECKED = (
     "3.3% tops forecast (Wed 25 Nov)"
 )
 
+# pill fg: one step darker than the shared palette constants, so the 8px
+# bold badge labels (and their 1px borders) read crisper on the tints
 PILL_STYLE = {
-    "OFFICIAL": (GREEN, GREEN_BG),
-    "REPORTED": (BLUE, BLUE_BG),
-    "CLAIM": (RED_DK, CLAIM_BG),
+    "OFFICIAL": ((36, 80, 45), GREEN_BG),
+    "REPORTED": ((32, 64, 102), BLUE_BG),
+    "CLAIM": ((128, 22, 20), CLAIM_BG),
 }
 
 
@@ -890,12 +899,16 @@ def build():
             draw_text(cv, cxx, yy + 9, "%d." % n, 9, True, RED_DK)
             lines = wrap_text(item, 9, False, dccolw - 16)
             draw_lines(cv, cxx + 14, yy, lines[:2], 9, 11, False, INK)
-    dc_y += 3 * 21 + 4
-    mlines = wrap_text(MORE_CHECKED, 8, False, CW - 16)
-    draw_lines(cv, MX + 8, dc_y, mlines, 8, 10, False, INK_SOFT)
-    dc_bottom = dc_y + 10 * len(mlines) + 6
+    dc_y += 3 * 21 + 2
+    # MORE row: +50% word spacing (space 2.0 -> 3.0px at 8px), leading 10 -> 11,
+    # max width 960 -> 944 so no line ends near the right border; the 2px
+    # saved in the gap above keeps the page bottom margin unchanged.
+    mlines = wrap_text(MORE_CHECKED, 8, False, CW - 32, space_extra=1.0)
+    draw_lines(cv, MX + 8, dc_y, mlines, 8, 11, False, INK_SOFT,
+               space_extra=1.0)
+    dc_bottom = dc_y + 11 * len(mlines) + 6
     cv.rect(MX, dc_top, CW, dc_bottom - dc_top, RED, 2)
-    y = dc_bottom + 6
+    y = dc_bottom + 5  # v1.1: 6 -> 5, returns the 1px the MORE leading cost
     # ---- footer
     draw_text(cv, MX, y + 9,
               "OFFICIAL = authority’s own figure or act · REPORTED = press "
