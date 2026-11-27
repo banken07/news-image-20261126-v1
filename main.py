@@ -73,8 +73,9 @@ CHIP_COLORS = {name: tuple(int(c * 0.78) for c in col)
 BALLOON_RED = (158, 46, 42)
 BALLOON_DK = (128, 40, 36)
 # v1.6: dark dot-matrix map — sea dark, land as region-coloured dots
-# v1.7: two new dot colours for the split regions (SOUTH ASIA purple,
-# UK gold); Asia dots split at lon 100, Europe dots at lon 0 (see draw_map)
+# v1.8: MIDDLE EAST dot colour (warm orange, distinct from AMERICAS
+# salmon and SOUTH ASIA purple); the map now colours it by lat/lon box
+# (see draw_map) instead of leaving Arabia/Iran in SOUTH ASIA.
 MAP_SEA = (36, 40, 48)
 MAP_DOTS = {
     "AMERICAS": (198, 110, 96),
@@ -82,6 +83,7 @@ MAP_DOTS = {
     "EUROPE": (158, 172, 104),
     "EAST ASIA": (112, 158, 208),
     "SOUTH ASIA": (158, 124, 166),
+    "MIDDLE EAST": (198, 124, 66),
     "UK": (200, 160, 90),
     "OCEANIA": (96, 178, 172),
 }
@@ -490,9 +492,10 @@ SMALL = [
 ]
 
 # v1.7: two-line coloured chips INSIDE each card's scene — (number, label,
-# region). Number ~12px bold, label 8px bold; both facts already in that
-# card's deck/headline (STORY-LIST.md). Chip colour = the story's region
-# (darkened, see CHIP_COLORS); the v1.6 black full-width band is gone.
+# region). Number 13px bold, label 9px bold (v1.8: was 12/8px); both facts
+# already in that card's deck/headline (STORY-LIST.md). Chip colour = the
+# story's region (darkened, see CHIP_COLORS); the v1.6 black full-width
+# band is gone.
 # Regions: S4 ME, S5 EUROPE, S6 AMERICAS, S7 UK, S8 EUROPE, S9 SOUTH ASIA,
 # S10 WORLD, S11 EAST ASIA, S12 EAST ASIA, S13 SOUTH ASIA.
 CHIPS = {
@@ -507,6 +510,14 @@ CHIPS = {
     12: ("168", "DEAD", "EAST ASIA"),
     13: ("213", "PRESUMED DEAD", "SOUTH ASIA"),
 }
+
+# v1.8: per-card chip corner — default top-left (4,2). S13 goes
+# top-right (99,2): the enlarged chip would otherwise cover the
+# back-peak snow cap, which sits top-centre-left in the flood scene.
+# 99 is the flush maximum: chip width 88px, scene width 187px, so the
+# chip ends exactly at the scene's right edge (the page's right margin —
+# S13 is the last column, no card to its right).
+CHIP_POS = {13: (99, 2)}
 
 # v1.7: (text, region, outlet) — region from the STORY-LIST.md tag
 # (EU bucket split UK/EUROPE as in REGION_COLORS: Liverpool + Top Gear are
@@ -586,16 +597,17 @@ def draw_pill(cv, x, y, label, size=8):
 
 
 def draw_chip(cv, x, y, num, lab, region):
-    """v1.7 two-line coloured chip inside a scene: number 12px bold over
-    label 8px bold, white on the story's darkened region colour, 1px paper
-    border. 21px tall. Returns the chip width."""
+    """v1.8 two-line coloured chip inside a scene: number 13px bold over
+    label 9px bold, white on the story's darkened region colour, 1px paper
+    border. 23px tall. v1.7 was 12/8px (21px) — the numbers were ~2.5px
+    at thumbnail. Returns the chip width."""
     col = CHIP_COLORS[region]
-    w = max(int(text_width(num, 12, True)),
-            int(text_width(lab, 8, True))) + 10
-    cv.fill_rect(x, y, w, 21, col)
-    cv.rect(x, y, w, 21, PAPER, 1)
-    draw_text(cv, x + 5, y + 11, num, 12, True, (255, 255, 255))
-    draw_text(cv, x + 5, y + 19, lab, 8, True, (255, 255, 255))
+    w = max(int(text_width(num, 13, True)),
+            int(text_width(lab, 9, True))) + 10
+    cv.fill_rect(x, y, w, 23, col)
+    cv.rect(x, y, w, 23, PAPER, 1)
+    draw_text(cv, x + 5, y + 12, num, 13, True, (255, 255, 255))
+    draw_text(cv, x + 5, y + 21, lab, 9, True, (255, 255, 255))
     return w
 
 
@@ -733,6 +745,15 @@ def scene_parade(cv, x, y, w, h):
         py = bcy + 10 + 21 * ca * st + 7 * sa * ct
         pts2.append((int(round(px)), int(round(py))))
     cv.fill_poly(pts2, BALLOON_DK)
+    # v1.8: balloon volume — a pale sheen on the upper-left + two panel
+    # seams following the tilt. The v1.7 balloon was a flat red oval; the
+    # top entries' hero scenes carry layered detail, and the sheen is the
+    # cheapest way to give the balloon depth without new facts.
+    cv.fill_ellipse(bcx - 12, bcy - 10, 9, 5, (205, 105, 92))
+    stroke3(cv, [(bcx - 10, bcy - 17), (bcx - 12, bcy),
+                 (bcx - 10, bcy + 17)], BALLOON_DK)
+    stroke3(cv, [(bcx + 8, bcy - 16), (bcx + 10, bcy + 1),
+                 (bcx + 8, bcy + 17)], BALLOON_DK)
     # ropes trailing down-left from the balloon (kept inside the scene box)
     cv.line(bcx - 20, bcy + 13, bcx - 32, bcy + 30, (26, 24, 20))
     cv.line(bcx + 14, bcy + 14, bcx + 5, bcy + 32, (26, 24, 20))
@@ -827,7 +848,9 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly([(cx - 12, cy + 4), (cx - 34, cy + 16), (cx - 20, cy + 16),
                       (cx + 2, cy + 6)], (38, 42, 48))
         cv.fill_ellipse(cx + 24, cy - 2, 7, 3, (250, 205, 80))
-        for sy in (cy - 6, cy + 1, cy + 8):
+        # v1.8: speed lines shifted +2px — the taller v1.8 chip's bottom
+        # edge grazed the top line's top edge
+        for sy in (cy - 4, cy + 3, cy + 10):
             cv.fill_rect(cx - 72, sy - 1, 16, 3, (38, 42, 48))
         # strike burst at the nose (the Kyiv strike)
         bx, by = cx + 64, cy + 1
@@ -841,7 +864,12 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_circle(bx, by, 3, (250, 205, 80))
     elif key == "chart":
         # v1.5: axes + bars + a line that PLUNGES then RECOVERS (V / dip and
-        # rise) — v1.2 only rose, which was wrong for the Nasdaq story
+        # rise) — v1.2 only rose, which was wrong for the Nasdaq story.
+        # v1.8: the whole chart sits 10px lower (cy+10) — the v1.7 chip
+        # covered the Y-axis top and the V-line's first (dip) point; the
+        # axis top now clears the chip bottom by 2px, and the baseline
+        # still sits 7px above the scene floor.
+        cy = cy + 10
         cv.fill_rect(cx - 70, cy - 13, 3, 26, INK)
         cv.fill_rect(cx - 70, cy + 10, 140, 3, INK)
         cv.fill_rect(cx - 58, cy - 4, 12, 14, BLUE)
@@ -856,9 +884,13 @@ def draw_icon(cv, x, y, w, h, key):
         # v1.5: subway front view + London Underground roundel (left) and a
         # closed crossing barrier (right) — the strike halting service
         # roundel: paper ring, red disc, blue bar (shapes, no text)
-        cv.fill_circle(cx - 56, cy - 2, 9, (248, 244, 233))
-        cv.fill_circle(cx - 56, cy - 2, 6, RED)
-        cv.fill_rect(cx - 68, cy - 4, 24, 4, BLUE)
+        # v1.8: centre cy-2 -> cy+5 — the v1.7 chip clipped the ring's top
+        # (4px; 6px with the taller v1.8 chip); the ring top now clears
+        # the chip bottom by 1px and its base still clears the track line
+        ry = cy + 5
+        cv.fill_circle(cx - 56, ry, 9, (248, 244, 233))
+        cv.fill_circle(cx - 56, ry, 6, RED)
+        cv.fill_rect(cx - 68, ry - 2, 24, 4, BLUE)
         # train body
         cv.fill_rect(cx - 26, cy - 14, 52, 28, (248, 244, 233))
         cv.rect(cx - 26, cy - 14, 52, 28, INK, 3)
@@ -1090,13 +1122,20 @@ def draw_map(cv, x, y, w, h):
         return (px, py)
 
     # continent -> region colour (North+South America = AMERICAS, Africa =
-    # WORLD, Europe = UK west of lon 0 / EUROPE east of it, Asia = SOUTH
-    # ASIA west of lon 100 / EAST ASIA east of it, Australia = OCEANIA).
-    # The lon splits are schematic (a dot map, not a survey): the pins
-    # themselves are placed by exact lon/lat and fall on the right side —
+    # WORLD except Egypt = MIDDLE EAST, Europe = UK / EUROPE by lat/lon
+    # box, Asia = MIDDLE EAST / SOUTH ASIA / EAST ASIA by lat/lon box,
+    # Australia = OCEANIA).
+    # v1.8: the v1.7 pure-longitude splits were schematic-wrong — Ireland
+    # and Iberia read UK-gold (both are EU members, so EUROPE green is
+    # correct there) and Arabia/Iran/Central Asia read SOUTH ASIA purple.
+    # Box rules now: UK = Great Britain (lon -6..2, lat >= 50) or
+    # Northern Ireland (lon -8..-5, lat 54..55.5); MIDDLE EAST =
+    # lon 26..66, lat 12..42 (Turkey south, Levant, Arabia, Iraq, Iran);
+    # SOUTH ASIA = lon 60..100, lat 5..38 (Pakistan, India, Nepal,
+    # Bangladesh, Sri Lanka); the rest of Asia = EAST ASIA. Pins are
+    # still placed by exact lon/lat and fall on the right side —
     # Mumbai/Kathmandu west, Seoul/Hong Kong east; London west, Kyiv/
-    # Brussels east. Ireland/Iberia dots read UK-gold and Central/West
-    # Asia dots read South-Asia purple — accepted schematic roughness.
+    # Brussels east.
     map_regions = ["AMERICAS", "AMERICAS", "WORLD", "EUROPE", "ASIA",
                    "OCEANIA"]
     polys = [[proj(lon, lat) for (lon, lat) in cont] for cont in CONTINENTS]
@@ -1118,12 +1157,22 @@ def draw_map(cv, x, y, w, h):
             for ci, poly in enumerate(polys):
                 if inside(gx, gy, poly):
                     reg = map_regions[ci]
-                    if ci == 3:  # Europe: UK / EUROPE split at lon 0
-                        lon = (gx - x) / float(w) * 358.0 - 168.0
-                        reg = "UK" if lon < 0 else "EUROPE"
-                    elif ci == 4:  # Asia: SOUTH / EAST split at lon 100
-                        lon = (gx - x) / float(w) * 358.0 - 168.0
-                        reg = "SOUTH ASIA" if lon < 100 else "EAST ASIA"
+                    lon = (gx - x) / float(w) * 358.0 - 168.0
+                    lat = 78.0 - (gy - y) / float(h) * 136.0
+                    if ci == 2:  # Africa: Egypt reads MIDDLE EAST
+                        if 25 <= lon <= 36 and 22 <= lat <= 32:
+                            reg = "MIDDLE EAST"
+                    elif ci == 3:  # Europe: UK / EUROPE by lat/lon box
+                        reg = "UK" if (lat >= 50 and -6 <= lon < 2) or \
+                            (54 <= lat <= 55.5 and -8 <= lon <= -5) \
+                            else "EUROPE"
+                    elif ci == 4:  # Asia: MIDDLE EAST / SOUTH / EAST
+                        if 26 <= lon <= 66 and 12 <= lat <= 42:
+                            reg = "MIDDLE EAST"
+                        elif 60 <= lon <= 100 and 5 <= lat < 38:
+                            reg = "SOUTH ASIA"
+                        else:
+                            reg = "EAST ASIA"
                     cv.fill_circle(gx, gy, 2, MAP_DOTS[reg])
                     break
     for (num, lon, lat, dx, dy) in PINS:
@@ -1244,7 +1293,8 @@ def build():
             cy0 = y + row * (cardh + 4)
             draw_icon(cv, cx0, cy0, cardw, 60, icon)
             cn, cl, creg = CHIPS[num]
-            draw_chip(cv, cx0 + 4, cy0 + 2, cn, cl, creg)
+            cdx, cdy = CHIP_POS.get(num, (4, 2))
+            draw_chip(cv, cx0 + cdx, cy0 + cdy, cn, cl, creg)
             draw_text(cv, cx0, cy0 + 68, "%d · %s" % (num, kick), 9, True,
                       RED_DK)
             pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 60, pill)
