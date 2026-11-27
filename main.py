@@ -45,9 +45,19 @@ REGION_COLORS = [
     # unambiguously British; EUROPE keeps Kyiv/Brussels/ECB/Lille).
     # Totals still 35 (EAST 3 + SOUTH 3 + ME 5 + AM 9 + OC 3 + UK 3 +
     # EUROPE 4 + WORLD 5). v1.6 colours desaturated ~15% toward grey.
+    # v2.0: 9 regions — AFRICA added (duel finding: Ebola + Africa were
+    # missing entirely; top entries carry 3-7 Africa stories). S13 Nepal
+    # becomes S13 Ebola (SOUTH 3 -> 2); S4 Cairo + A9/A17 Somalia move
+    # MIDDLE EAST -> AFRICA (ME 5 -> 2). New totals: EAST 3 + SOUTH 2 +
+    # ME 2 + AFRICA 4 + AM 9 + OC 3 + UK 3 + EUROPE 4 + WORLD 5 = 35.
+    # AFRICA magenta-rose: distinct from SOUTH ASIA purple, AMERICAS
+    # brick and UK gold. Note: the two 2-count segments are 56px wide
+    # while "SOUTH ASIA 2" / "MIDDLE EAST 2" need 69/77px at 10px — the
+    # bar draws narrow labels at 7px (see build()).
     ("EAST ASIA", 3, (58, 96, 135)),
-    ("SOUTH ASIA", 3, (122, 88, 130)),
-    ("MIDDLE EAST", 5, (171, 91, 45)),
+    ("SOUTH ASIA", 2, (122, 88, 130)),
+    ("MIDDLE EAST", 2, (171, 91, 45)),
+    ("AFRICA", 4, (178, 62, 104)),
     ("AMERICAS", 9, (123, 58, 53)),
     ("OCEANIA", 3, (55, 113, 111)),
     ("UK", 3, (158, 120, 50)),
@@ -84,6 +94,7 @@ MAP_DOTS = {
     "EAST ASIA": (112, 158, 208),
     "SOUTH ASIA": (158, 124, 166),
     "MIDDLE EAST": (198, 124, 66),
+    "AFRICA": (178, 62, 104),
     "UK": (200, 160, 90),
     "OCEANIA": (96, 178, 172),
 }
@@ -413,7 +424,11 @@ STATS = [
     ("+1.6%", "NIKKEI · THU REBOUND"),
     ("$94.61", "BRENT · +3.5%"),
     ("31", "DEAD · CAIRO FIRE"),
-    ("18TH", "ANNIV. · 26/11 MUMBAI"),
+    # v2.0: "18TH / ANNIV. · 26/11 MUMBAI" replaced by the Ebola stat —
+    # the duel's biggest content gap (12,021 cases in DR Congo, reported
+    # Thu 26 Nov by Reuters). The Mumbai story stays as card S9; only
+    # the stat slot changes.
+    ("12,021", "EBOLA CASES"),
     ("€45BN", "UKRAINE LOAN"),
 ]
 
@@ -430,26 +445,41 @@ LEADS = [
     {
         "num": 1, "kick": "WASHINGTON · TRADE", "pill": "REPORTED",
         "head": "US proposes tariffs on 14 partners",
+        # v2.0: deck trimmed to 2 lines (was 3) to fund the WHY IT
+        # MATTERS line below — drops "Asia rebounds as levies look
+        # milder" (still carried by ALSO A1 + the Nikkei stat).
         "deck": ("India 25%, Japan 15%, China & Vietnam 20% in some reports. "
-                 "EU rejects the premise; Brazil calls it unacceptable; Asia "
-                 "rebounds as levies look milder."),
+                 "EU rejects the premise; Brazil calls it unacceptable."),
+        # v2.0: WHY IT MATTERS — one red line under each lead deck (the
+        # top entries' signal line). Facts only, all already in the deck
+        # / RESEARCH.md: 14 partners face the proposed levies.
+        "why": "WHY IT MATTERS: Levies would hit 14 partners at once.",
         "meta": "BBC, France 24, Japan Times · USTR order, Wed",
         "scene": "tariffs",
     },
     {
         "num": 2, "kick": "RAS TANURA · CONFLICT", "pill": "CLAIM",
         "head": "Houthis claim Ras Tanura refinery hit",
+        # v2.0: deck UNCHANGED — already 2 lines (verified by measure).
         "deck": ("Smoke seen by satellite over the 550,000-bpd plant. Coalition "
                  "says 4 drones downed; Jazan port struck. Brent jumps 3.5%."),
+        # v2.0: WHY IT MATTERS — Brent +3.5% on Gulf fears (deck + ALSO A2).
+        "why": "WHY IT MATTERS: Brent jumped 3.5% on Gulf supply fears.",
         "meta": "Reuters · claim: Houthis",
         "scene": "refinery",
     },
     {
         "num": 3, "kick": "NEW YORK · CULTURE", "pill": "OFFICIAL",
         "head": "Macy’s 100th parade postponed",
+        # v2.0: deck trimmed to 2 lines (was 3) — drops "Balloons
+        # deflated; NBC airs a 2025 rerun" (the deflated balloon is the
+        # scene itself; the rerun is minor).
         "deck": ("First weather delay ever — the parade moves to Saturday "
-                 "8:30 a.m. as a nor’easter brings gusts to 60 mph. Balloons "
-                 "deflated; NBC airs a 2025 rerun."),
+                 "8:30 a.m. as a nor’easter brings gusts to 60 mph."),
+        # v2.0: WHY IT MATTERS — first weather postponement in the
+        # parade's 100-year history (deck + RESEARCH.md: suspended only
+        # in WWII 1942-44).
+        "why": "WHY IT MATTERS: First weather delay in 100 parades.",
         "meta": "Reuters, CNN · announced Wed",
         "scene": "parade",
     },
@@ -485,10 +515,17 @@ SMALL = [
      "Hong Kong marks year since fire killed 168",
      "Tai Po’s Wang Fuk Court, one year on. No official memorial; "
      "families still await full answers. (Japan Times, BBC)", "memorial"),
-    (13, "KATHMANDU · DISASTER", "REPORTED",
-     "Nepal: 213 Indians presumed dead",
-     "Kathmandu begins declaring flood-missing Indians dead; embassy asks "
-     "families to come forward. (The Hindu)", "flood"),
+    # v2.0: S13 Nepal (213 presumed dead) SWAPPED for the Ebola card —
+    # the duel's biggest content gap. Facts verified by parent via
+    # Reuters 26 Nov 2026 (DR Congo govt data): 12,021 confirmed cases,
+    # 5,904 deaths, Bundibugyo strain, second-largest Ebola outbreak on
+    # record, response disrupted by fighting. ECDC: 12,021 at 24 Nov;
+    # MoH SitRep 195 at 25 Nov (12,089 / 5,943) is the 25 Nov figure,
+    # NOT used. Total stays 35 (1-for-1 swap); region AFRICA.
+    (13, "DR CONGO · DISASTER", "REPORTED",
+     "Ebola tops 12,000 cases in DR Congo",
+     "12,021 cases, 5,904 dead — second-largest Ebola outbreak ever "
+     "recorded. (Reuters)", "ebola"),
 ]
 
 # v1.7: two-line coloured chips INSIDE each card's scene — (number, label,
@@ -496,10 +533,11 @@ SMALL = [
 # already in that card's deck/headline (STORY-LIST.md). Chip colour = the
 # story's region (darkened, see CHIP_COLORS); the v1.6 black full-width
 # band is gone.
-# Regions: S4 ME, S5 EUROPE, S6 AMERICAS, S7 UK, S8 EUROPE, S9 SOUTH ASIA,
-# S10 WORLD, S11 EAST ASIA, S12 EAST ASIA, S13 SOUTH ASIA.
+# Regions: S4 AFRICA (v2.0: Cairo moved MIDDLE EAST -> AFRICA), S5 EUROPE,
+# S6 AMERICAS, S7 UK, S8 EUROPE, S9 SOUTH ASIA, S10 WORLD, S11 EAST ASIA,
+# S12 EAST ASIA, S13 AFRICA (v2.0: Ebola, was SOUTH ASIA Nepal).
 CHIPS = {
-    4: ("31", "DEAD", "MIDDLE EAST"),
+    4: ("31", "DEAD", "AFRICA"),
     5: ("5", "JETS DOWNED", "EUROPE"),
     6: ("−4.6%", "THEN RECOVERED", "AMERICAS"),
     7: ("TUBE", "HALTED", "UK"),
@@ -508,7 +546,7 @@ CHIPS = {
     10: ("GAME 3", "1–1", "WORLD"),
     11: ("3.25%", "RATE", "EAST ASIA"),
     12: ("168", "DEAD", "EAST ASIA"),
-    13: ("213", "PRESUMED DEAD", "SOUTH ASIA"),
+    13: ("12,021", "CASES", "AFRICA"),
 }
 
 # v1.8: per-card chip corner — default top-left (4,2). S13 goes
@@ -517,7 +555,10 @@ CHIPS = {
 # 99 is the flush maximum: chip width 88px, scene width 187px, so the
 # chip ends exactly at the scene's right edge (the page's right margin —
 # S13 is the last column, no card to its right).
-CHIP_POS = {13: (99, 2)}
+# v2.0: the flood scene is gone (S13 is now Ebola) and the new Ebola
+# scene is drawn clear at top-left (tent apex sits right of x+61),
+# so S13 uses the default top-left corner again. No overrides remain.
+CHIP_POS = {}
 
 # v1.7: (text, region, outlet) — region from the STORY-LIST.md tag
 # (EU bucket split UK/EUROPE as in REGION_COLORS: Liverpool + Top Gear are
@@ -532,7 +573,7 @@ ALSO = [
     ("Brazil withdraws ambassador to Argentina for good", "AMERICAS", "MercoPress"),
     ("Hasina return dispute: India separates return from extradition", "SOUTH ASIA", "The Hindu"),
     ("ISIL suicide attack kills 2 in Hasakah, Syria", "MIDDLE EAST", "Al Jazeera"),
-    ("Somalia: foreign troops withdraw; Uganda steps up anti-al-Shabaab fight", "MIDDLE EAST", "BBC"),
+    ("Somalia: foreign troops withdraw; Uganda steps up anti-al-Shabaab fight", "AFRICA", "BBC"),
     ("Australia projected to miss its 2035 emissions target", "OCEANIA", "Guardian"),
     ("Flinders Island fire destroys at least 6 homes", "OCEANIA", "Guardian"),
     ("Liverpool beat Club Brugge 3–0 in the Champions League", "UK", "BBC"),
@@ -540,7 +581,7 @@ ALSO = [
     ("Rare lakes found beneath the Red Sea", "WORLD", "ScienceDaily"),
     ("Canadian astronaut welcomes a baby girl from orbit", "WORLD", "BBC"),
     ("Pig-kidney patient marks one year off dialysis", "AMERICAS", "CBC"),
-    ("Famine risk falls in Baidoa, Somalia — but hunger persists", "MIDDLE EAST", "AllAfrica"),
+    ("Famine risk falls in Baidoa, Somalia — but hunger persists", "AFRICA", "AllAfrica"),
     ("US Army calls Iowa 5-ton blast a 'huge success'", "AMERICAS", "BBC"),
     ("Kurtley Beale returns to the Wallabies after five years", "OCEANIA", "ABC"),
     ("Gordon Ramsay to host revived Top Gear", "UK", "BBC"),
@@ -827,7 +868,8 @@ def draw_icon(cv, x, y, w, h, key):
           "chart": (238, 232, 216), "train": (176, 32, 28),
           "flag": (38, 74, 118), "candle": (52, 48, 44),
           "chess": (238, 232, 216), "bank": (226, 220, 200),
-          "memorial": (52, 48, 44), "flood": (206, 220, 232)}[key]
+          "memorial": (52, 48, 44), "flood": (206, 220, 232),
+          "ebola": (206, 220, 232)}[key]
     cv.fill_rect(x, y, w, h, bg)
     cx, cy = x + w // 2, y + h // 2
     if key == "flame":
@@ -1046,6 +1088,39 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_circle(cx + 44, cy + 6, 9, (255, 255, 255))
         cv.fill_rect(cx + 43, cy - 1, 3, 14, RED)
         cv.fill_rect(cx + 37, cy + 5, 14, 3, RED)
+    elif key == "ebola":
+        # v2.0: Ebola treatment centre — isolation tent + PPE health
+        # worker + small virus motif. Respectful, no gore: the story is
+        # the outbreak's scale (12,021 cases), not suffering. The chip
+        # sits top-left (45px wide), so the tent apex is kept right of
+        # x+61 and the worker right of x+127 — both clear of the chip.
+        cv.fill_rect(x, cy + 16, w, h - 46, (172, 178, 182))  # ground band
+        # tent: white triangle, ink outline, dark door
+        cv.fill_poly([(cx - 52, cy + 16), (cx - 22, cy - 14),
+                      (cx + 8, cy + 16)], (248, 244, 233))
+        stroke3(cv, [(cx - 52, cy + 16), (cx - 22, cy - 14),
+                     (cx + 8, cy + 16), (cx - 52, cy + 16)], INK)
+        cv.fill_poly([(cx - 30, cy + 16), (cx - 22, cy - 2),
+                      (cx - 14, cy + 16)], (52, 48, 44))
+        # PPE worker: hooded figure right of the tent
+        cv.fill_circle(cx + 45, cy - 8, 8, INK)
+        cv.fill_circle(cx + 45, cy - 8, 7, (168, 190, 210))
+        cv.fill_ellipse(cx + 45, cy - 8, 4, 5, (52, 48, 44))
+        cv.fill_poly([(cx + 34, cy + 16), (cx + 38, cy - 2),
+                      (cx + 52, cy - 2), (cx + 56, cy + 16)],
+                     (168, 190, 210))
+        stroke3(cv, [(cx + 34, cy + 16), (cx + 38, cy - 2),
+                     (cx + 52, cy - 2), (cx + 56, cy + 16),
+                     (cx + 34, cy + 16)], INK)
+        # virus motif, bottom-left (below the chip): spiky dark-red ball
+        vx, vy = cx - 70, cy + 8
+        for k in range(8):
+            a = k * 3.14159265 / 4.0
+            cv.line(vx + int(round(5 * _cos(a))),
+                    vy + int(round(5 * _sin(a))),
+                    vx + int(round(8 * _cos(a))),
+                    vy + int(round(8 * _sin(a))), RED_DK)
+        cv.fill_circle(vx, vy, 5, RED_DK)
 
 
 def blit_scaled(cv, src, x, y, w, h):
@@ -1126,7 +1201,9 @@ PINS = [
     (10, 6.1, 46.2, 8, 22),
     (11, 127.0, 37.6, 10, -10),
     (12, 114.2, 22.3, 10, 8),
-    (13, 85.3, 27.7, -16, 14),
+    # v2.0: pin 13 moves Kathmandu (85.3, 27.7) -> Beni, North Kivu, DR
+    # Congo (29.6, 0.5), the Ebola outbreak's epicentre.
+    (13, 29.6, 0.5, 10, 10),
 ]
 
 
@@ -1143,9 +1220,10 @@ def draw_map(cv, x, y, w, h):
         return (px, py)
 
     # continent -> region colour (North+South America = AMERICAS, Africa =
-    # WORLD except Egypt = MIDDLE EAST, Europe = UK / EUROPE by lat/lon
-    # box, Asia = MIDDLE EAST / SOUTH ASIA / EAST ASIA by lat/lon box,
-    # Australia = OCEANIA).
+    # v2.0: Egypt + DR Congo + Somalia read AFRICA (the new 9th region);
+    # the rest of Africa stays WORLD grey, Europe = UK / EUROPE by
+    # lat/lon box, Asia = MIDDLE EAST / SOUTH ASIA / EAST ASIA by
+    # lat/lon box, Australia = OCEANIA).
     # v1.8: the v1.7 pure-longitude splits were schematic-wrong — Ireland
     # and Iberia read UK-gold (both are EU members, so EUROPE green is
     # correct there) and Arabia/Iran/Central Asia read SOUTH ASIA purple.
@@ -1184,9 +1262,12 @@ def draw_map(cv, x, y, w, h):
                     reg = map_regions[ci]
                     lon = (gx - x) / float(w) * 358.0 - 168.0
                     lat = 78.0 - (gy - y) / float(h) * 136.0
-                    if ci == 2:  # Africa: Egypt reads MIDDLE EAST
-                        if 25 <= lon <= 36 and 22 <= lat <= 32:
-                            reg = "MIDDLE EAST"
+                    if ci == 2:  # Africa: Egypt + DR Congo + Somalia
+                        # read AFRICA (v2.0); the rest stays WORLD grey
+                        if (25 <= lon <= 36 and 22 <= lat <= 32) or \
+                           (12 <= lon <= 31 and -13 <= lat <= 5) or \
+                           (40 <= lon <= 51 and -2 <= lat <= 12):
+                            reg = "AFRICA"
                     elif ci == 3:  # Europe: UK / EUROPE by lat/lon box
                         reg = "UK" if (lat >= 50 and -6 <= lon < 2) or \
                             (54 <= lat <= 55.5 and -8 <= lon <= -5) \
@@ -1218,7 +1299,7 @@ def build():
     y = 8
     # top strip
     draw_text(cv, MX, y + 11, "THE WORLD IN ONE DAY", 11, True, INK)
-    draw_text(cv, MX + CW, y + 11, "35 STORIES · 8 REGIONS · THURSDAY 26 NOVEMBER 2026",
+    draw_text(cv, MX + CW, y + 11, "35 STORIES · 9 REGIONS · THURSDAY 26 NOVEMBER 2026",
               11, True, INK, "r")
     y += 13
     cv.hline(MX, y, CW, RULE, 2)
@@ -1249,7 +1330,11 @@ def build():
     y += 4
     # region bar: segments proportional to story counts (must total 35) —
     # v1.7: 8 segments; the last takes the remainder so rounding never
-    # overshoots the 976px content width by a pixel
+    # overshoots the 976px content width by a pixel.
+    # v2.0: 9 segments. The two 2-count segments are only 56px wide while
+    # "SOUTH ASIA 2" needs 69px and "MIDDLE EAST 2" 77px at 10px, so the
+    # label shrinks to 7px on segments too narrow for 10px (floor 7px;
+    # "MIDDLE EAST 2" at 7px is 54px in a 56px segment — 1px a side).
     total = sum(c for (_, c, _) in REGION_COLORS)
     assert total == 35, total
     rx = MX
@@ -1257,8 +1342,12 @@ def build():
         seg = int(round(CW * count / 35.0)) if si < len(REGION_COLORS) - 1 \
             else MX + CW - rx
         cv.fill_rect(rx, y, seg, 20, col)
-        draw_text(cv, rx + seg // 2, y + 14, "%s %d" % (name, count), 10,
-                  True, (255, 255, 255), "c")
+        label = "%s %d" % (name, count)
+        rsize = 10
+        while rsize > 7 and text_width(label, rsize, True) > seg - 2:
+            rsize -= 1
+        draw_text(cv, rx + seg // 2, y + 11 + int(rsize * 0.35), label,
+                  rsize, True, (255, 255, 255), "c")
         rx += seg
     y += 20
     # v1.7: FIELDS strip — the same 35 stories by topic (see FIELDS above),
@@ -1297,9 +1386,15 @@ def build():
         dy = hy + 21 * len(lines) + 2
         dlines = wrap_text(lead["deck"], 11, False, lw)
         draw_lines(cv, lx, dy, dlines, 11, 12, False, INK_SOFT)
-        my = dy + 12 * len(dlines) + 8
+        # v2.0: WHY IT MATTERS, one red bold line under each lead deck.
+        # Decks are 2 lines now (L1/L3 trimmed, L2 already was), so the
+        # row advance is unchanged: 2*12 deck + 12 WHY = the old 3*12
+        # deck, and the meta lands exactly where it did in v1.9.
+        wy = dy + 12 * len(dlines) + 12
+        draw_text(cv, lx, wy, lead["why"], 10, True, RED)
+        my = wy + 8
         draw_text(cv, lx, my, lead["meta"], 9, False, INK_SOFT)
-    y = lead_top + 16 + 64 + 6 + 2 * 21 + 2 + 3 * 12 + 8 + 5
+    y = lead_top + 16 + 64 + 6 + 2 * 21 + 2 + 2 * 12 + 12 + 8 + 5
     cv.hline(MX, y, CW, (200, 192, 172), 1)
     y += 6
     # ---- small cards: 5 across x 2 rows
