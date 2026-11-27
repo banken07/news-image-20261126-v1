@@ -39,13 +39,27 @@ GOLD = (176, 132, 40)
 SLATE = (52, 58, 66)
 
 REGION_COLORS = [
-    ("ASIA-PACIFIC", 6, (46, 90, 136)),
-    ("MIDDLE EAST", 5, (179, 84, 30)),
-    ("AMERICAS", 9, (122, 46, 40)),
-    ("OCEANIA", 3, (42, 110, 108)),
-    ("EUROPE", 7, (96, 110, 58)),
-    ("WORLD", 5, (72, 70, 66)),
+    # v1.6: desaturated ~15% toward grey (the region bar was the most
+    # saturated band on the page after the L3 balloon)
+    ("ASIA-PACIFIC", 6, (58, 96, 135)),
+    ("MIDDLE EAST", 5, (171, 91, 45)),
+    ("AMERICAS", 9, (123, 58, 53)),
+    ("OCEANIA", 3, (55, 113, 111)),
+    ("EUROPE", 7, (101, 113, 68)),
+    ("WORLD", 5, (80, 79, 75)),
 ]
+# v1.6: balloon red, desaturated (was the largest saturated red block)
+BALLOON_RED = (158, 46, 42)
+BALLOON_DK = (128, 40, 36)
+# v1.6: dark dot-matrix map — sea dark, land as region-coloured dots
+MAP_SEA = (36, 40, 48)
+MAP_DOTS = {
+    "AMERICAS": (198, 110, 96),
+    "WORLD": (168, 162, 150),
+    "EUROPE": (158, 172, 104),
+    "ASIA-PACIFIC": (112, 158, 208),
+    "OCEANIA": (96, 178, 172),
+}
 
 
 class Canvas:
@@ -418,37 +432,52 @@ LEADS = [
 SMALL = [
     (4, "CAIRO · DISASTER", "OFFICIAL", "Cairo tanker fire kills 31",
      "Fuel tanker overturns on the Ring Road, Wed evening; 21 hurt, 27 "
-     "vehicles charred; toll is preliminary.", "flame"),
+     "vehicles charred; toll is preliminary. (AP)", "flame"),
     (5, "KYIV · CONFLICT", "REPORTED", "Ukraine hits 5 jets; Kyiv struck",
      "Savasleyka airbase hit — 3 MiG-31s, 2 Su-34s. Russia hits Kyiv "
-     "shopping centre; 2 Samara refineries struck.", "jet"),
+     "shopping centre; 2 Samara refineries struck. (BBC)", "jet"),
     (6, "NEW YORK · ECONOMY", "REPORTED", "Nasdaq plunges, then recovers",
      "Wed close −0.6% at 23,586 after −4.6% intraday dive; Nasdaq-100 "
-     "briefly −20% off record. Nvidia −3.9%.", "chart"),
+     "briefly −20% off record. Nvidia −3.9%. (AP, CNBC)", "chart"),
     (7, "LONDON · SOCIETY", "OFFICIAL", "Tube strike halts London",
      "RMT walkout from noon Thu to noon Fri; no Piccadilly or Circle all "
-     "day, no service at all after 21:00.", "train"),
+     "day, no service at all after 21:00. (TfL)", "train"),
     (8, "BRUSSELS · ECONOMY", "REPORTED", "EU fights over €45bn Ukraine loan",
      "Leaders meet Thu over a €1.58tn budget and Kyiv’s 2027 gap; deal "
-     "aimed for 17–18 Dec.", "flag"),
+     "aimed for 17–18 Dec. (Reuters, AP)", "flag"),
     (9, "MUMBAI · SOCIETY", "OFFICIAL", "India marks 18 years since 26/11",
      "166 killed in 2008; Mumbai on high alert as tributes are paid. "
-     "Jaishankar: zero tolerance on terror.", "candle"),
+     "Jaishankar: zero tolerance on terror. (IANS)", "candle"),
     (10, "GENEVA · SPORT", "OFFICIAL", "Gukesh–Sindarov: Game 3 today",
      "World title match level 1–1 after two draws. Sindarov has White; "
-     "first to 7.5 points takes the $2.5m crown.", "chess"),
+     "first to 7.5 points takes the $2.5m crown. (FIDE)", "chess"),
     (11, "SEOUL · ECONOMY", "OFFICIAL", "Bank of Korea lifts rate to 3.25%",
      "Up 25bp, the highest in two years; 2027 growth forecast raised to "
-     "4.1%.", "bank"),
+     "4.1%. (Yonhap, CNBC)", "bank"),
     (12, "HONG KONG · SOCIETY", "REPORTED",
      "Hong Kong marks year since fire killed 168",
      "Tai Po’s Wang Fuk Court, one year on. No official memorial; "
-     "families still await full answers.", "memorial"),
+     "families still await full answers. (Japan Times, BBC)", "memorial"),
     (13, "KATHMANDU · DISASTER", "REPORTED",
      "Nepal: 213 Indians presumed dead",
      "Kathmandu begins declaring flood-missing Indians dead; embassy asks "
-     "families to come forward.", "flood"),
+     "families to come forward. (The Hindu)", "flood"),
 ]
+
+# v1.6: full-width data chips opening every card — each chip is a fact
+# already in that card's deck/headline (STORY-LIST.md / RESEARCH.md)
+CHIPS = {
+    4: "31 DEAD",
+    5: "5 JETS DOWNED",
+    6: "−4.6% THEN RECOVERED",
+    7: "TUBE HALTED",
+    8: "€45BN LOAN",
+    9: "18 YEARS SINCE 26/11",
+    10: "GAME 3 · 1–1",
+    11: "3.25% RATE",
+    12: "168 DEAD",
+    13: "213 PRESUMED DEAD",
+}
 
 ALSO = [
     "Asia rebounds: Nikkei +1.6% as tariffs look milder; Shanghai −2.1%",
@@ -598,6 +627,16 @@ def scene_refinery(cv, x, y, w, h):
     cv.fill_rect(x + 32, y + h - 24, 44, 3, (38, 34, 36))
     cv.fill_rect(x + 4, y + 4, 104, 15, INK)
     draw_text(cv, x + 8, y + 15, "550,000 BPD", 9, True, (255, 255, 255))
+    # v1.6: visible in-scene data — Brent move (mid band, right of the vent
+    # stack; the first placement at y+6 hid the flare flame, so it sits
+    # below it now) and drones downed (mid band, between tower and tanks);
+    # both facts are already in this lead's deck, now visible without
+    # reading the deck
+    cv.fill_rect(x + 170, y + 24, 88, 15, INK)
+    draw_text(cv, x + 174, y + 35, "BRENT +3.5%", 9, True, (255, 255, 255))
+    cv.fill_rect(x + 40, y + 26, 106, 15, INK)
+    draw_text(cv, x + 44, y + 37, "4 DRONES DOWNED", 9, True,
+              (255, 255, 255))
 
 
 def scene_parade(cv, x, y, w, h):
@@ -622,7 +661,9 @@ def scene_parade(cv, x, y, w, h):
                          (250, 205, 80))
     # big balloon, tilted by the wind (top leaning right) — the parade
     # motif. v1.5 fix: rounder (rx 40, ry 26) — the first version was so
-    # flat (48x20) it read as a leaf/disc, not a balloon
+    # flat (48x20) it read as a leaf/disc, not a balloon.
+    # v1.6: shrunk (rx 30, ry 20) and desaturated — it was the largest
+    # saturated red block in the hero and read as decoration, not data
     bcx, bcy = x + 170, y + 30
     t = 0.28
     ct, st = _cos(t), _sin(t)
@@ -630,22 +671,22 @@ def scene_parade(cv, x, y, w, h):
     for k in range(28):
         a = k * 2 * 3.14159265 / 28.0
         ca, sa = _cos(a), _sin(a)
-        px = bcx + 40 * ca * ct - 26 * sa * st
-        py = bcy + 40 * ca * st + 26 * sa * ct
+        px = bcx + 30 * ca * ct - 20 * sa * st
+        py = bcy + 30 * ca * st + 20 * sa * ct
         pts.append((int(round(px)), int(round(py))))
-    cv.fill_poly(pts, (172, 32, 28))
+    cv.fill_poly(pts, BALLOON_RED)
     # darker fold band across the balloon belly
     pts2 = []
     for k in range(28):
         a = k * 2 * 3.14159265 / 28.0
         ca, sa = _cos(a), _sin(a)
-        px = bcx + 4 + 28 * ca * ct - 9 * sa * st
-        py = bcy + 10 + 28 * ca * st + 9 * sa * ct
+        px = bcx + 4 + 21 * ca * ct - 7 * sa * st
+        py = bcy + 10 + 21 * ca * st + 7 * sa * ct
         pts2.append((int(round(px)), int(round(py))))
-    cv.fill_poly(pts2, (140, 24, 22))
+    cv.fill_poly(pts2, BALLOON_DK)
     # ropes trailing down-left from the balloon (kept inside the scene box)
-    cv.line(bcx - 26, bcy + 16, bcx - 40, bcy + 36, (26, 24, 20))
-    cv.line(bcx + 18, bcy + 18, bcx + 6, bcy + 38, (26, 24, 20))
+    cv.line(bcx - 20, bcy + 13, bcx - 32, bcy + 30, (26, 24, 20))
+    cv.line(bcx + 14, bcy + 14, bcx + 5, bcy + 32, (26, 24, 20))
     # confetti blown sideways
     for (ccx, ccy, col) in [(230, 10, GOLD), (250, 16, (250, 205, 80)),
                             (280, 12, BLUE), (300, 20, (248, 244, 233)),
@@ -661,8 +702,14 @@ def scene_parade(cv, x, y, w, h):
     cv.fill_rect(x + 286, y + h - 26, 3, 14, (26, 24, 20))
     cv.fill_poly([(x + 289, y + h - 26), (x + 301, y + h - 23),
                   (x + 289, y + h - 20)], GOLD)
-    cv.fill_rect(x + 4, y + 4, 118, 15, INK)
-    draw_text(cv, x + 8, y + 15, "100TH · SAT 08:30", 9, True, (255, 255, 255))
+    # v1.6: the old small "100TH · SAT 08:30" chip becomes visible data —
+    # a big "100TH" badge + "SAT 08:30" on the sky, and a "GUSTS 60 MPH"
+    # chip top-right (both facts already in this lead's deck)
+    draw_text(cv, x + 8, y + 28, "100TH", 22, True, (255, 255, 255))
+    draw_text(cv, x + 8, y + 43, "SAT 08:30", 10, True, (255, 255, 255))
+    cv.fill_rect(x + w - 96, y + 4, 92, 15, INK)
+    draw_text(cv, x + w - 92, y + 15, "GUSTS 60 MPH", 9, True,
+              (255, 255, 255))
 
 
 SCENES = {"tariffs": scene_tariffs, "refinery": scene_refinery,
@@ -892,6 +939,29 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(cx + 37, cy + 5, 14, 3, RED)
 
 
+def blit_scaled(cv, src, x, y, w, h):
+    """Copy src canvas scaled to (w, h) at (x, y) with a box-average
+    downsample — flat vector art stays crisp, no nearest-neighbour crunch.
+    Used v1.6 to shrink the v1.5 spot icons so the data chip fits."""
+    sw, sh = src.w, src.h
+    for yy in range(h):
+        y0 = yy * sh // h
+        y1 = max(y0 + 1, (yy + 1) * sh // h)
+        for xx in range(w):
+            x0 = xx * sw // w
+            x1 = max(x0 + 1, (xx + 1) * sw // w)
+            r = g = b = n = 0
+            for sy in range(y0, y1):
+                base = (sy * sw + x0) * 3
+                for sx in range(x0, x1):
+                    i = base + (sx - x0) * 3
+                    r += src.px[i]
+                    g += src.px[i + 1]
+                    b += src.px[i + 2]
+                    n += 1
+            cv.set_px(x + xx, y + yy, (r // n, g // n, b // n))
+
+
 def _cos(a):
     import math
     return math.cos(a)
@@ -952,7 +1022,10 @@ PINS = [
 
 
 def draw_map(cv, x, y, w, h):
-    cv.fill_rect(x, y, w, h, SEA)
+    # v1.6: dark dot-matrix — land as region-coloured dots on a dark sea
+    # (the v1.5 beige land was the lowest-contrast element on the page;
+    # the top entries use a dark map). Pins numbered 1-13 unchanged.
+    cv.fill_rect(x, y, w, h, MAP_SEA)
     cv.rect(x, y, w, h, INK, 1)
 
     def proj(lon, lat):
@@ -960,20 +1033,35 @@ def draw_map(cv, x, y, w, h):
         py = y + (78.0 - lat) / 136.0 * h
         return (px, py)
 
-    for cont in CONTINENTS:
-        cv.fill_poly([proj(lon, lat) for (lon, lat) in cont], LAND)
-        pts = [proj(lon, lat) for (lon, lat) in cont]
-        for i in range(len(pts)):
-            x0, y0 = pts[i]
-            x1, y1 = pts[(i + 1) % len(pts)]
-            # 2px coastline: two parallel 1px strokes
-            cv.line(int(x0), int(y0), int(x1), int(y1), LAND_LINE)
-            cv.line(int(x0), int(y0) + 1, int(x1), int(y1) + 1, LAND_LINE)
+    # continent -> region colour (North+South America = AMERICAS, Africa =
+    # WORLD, Europe = EUROPE, Asia = ASIA-PACIFIC, Australia = OCEANIA)
+    map_regions = ["AMERICAS", "AMERICAS", "WORLD", "EUROPE",
+                   "ASIA-PACIFIC", "OCEANIA"]
+    polys = [[proj(lon, lat) for (lon, lat) in cont] for cont in CONTINENTS]
+
+    def inside(px, py, poly):
+        n = len(poly)
+        ok = False
+        for i in range(n):
+            x0, y0 = poly[i]
+            x1, y1 = poly[(i + 1) % n]
+            if (y0 > py) != (y1 > py):
+                xin = x0 + (py - y0) * (x1 - x0) / (y1 - y0)
+                if px < xin:
+                    ok = not ok
+        return ok
+
+    for gy in range(y + 3, y + h - 2, 6):
+        for gx in range(x + 3, x + w - 2, 6):
+            for ci, poly in enumerate(polys):
+                if inside(gx, gy, poly):
+                    cv.fill_circle(gx, gy, 2, MAP_DOTS[map_regions[ci]])
+                    break
     for (num, lon, lat, dx, dy) in PINS:
         px, py = proj(lon, lat)
         lx, ly = int(px + dx), int(py + dy)
-        cv.line(int(px), int(py), lx, ly, RED_DK)
-        cv.fill_circle(int(px), int(py), 2, RED_DK)
+        cv.line(int(px), int(py), lx, ly, RED)
+        cv.fill_circle(int(px), int(py), 2, (255, 255, 255))
         # crisp pin: dark outer ring + white ring + red core, white number
         cv.fill_circle(lx, ly, 9, RED_DK)
         cv.fill_circle(lx, ly, 8, (255, 255, 255))
@@ -1060,23 +1148,31 @@ def build():
     cv.hline(MX, y, CW, (200, 192, 172), 1)
     y += 8
     # ---- small cards: 5 across x 2 rows
+    # v1.6: cardh 124 -> 138 (funded by the DATE CHECK prose reflow, P3);
+    # every card opens with a full-width data chip, the v1.5 illustration
+    # is kept but scaled 38 -> 30px tall, deck raised 10 -> 11px
     cardw = (CW - 4 * 10) // 5
-    cardh = 124
+    cardh = 138
     for row in range(2):
         for col in range(5):
             idx = row * 5 + col
             num, kick, pill, head, deck, icon = SMALL[idx]
             cx0 = MX + col * (cardw + 10)
             cy0 = y + row * (cardh + 6)
-            draw_icon(cv, cx0, cy0, cardw, 38, icon)
-            draw_text(cv, cx0, cy0 + 50, "%d · %s" % (num, kick), 9, True,
+            cv.fill_rect(cx0, cy0, cardw, 13, INK)
+            draw_text(cv, cx0 + 6, cy0 + 10, CHIPS[num], 10, True,
+                      (255, 255, 255))
+            tmp = Canvas(cardw, 38)
+            draw_icon(tmp, 0, 0, cardw, 38, icon)
+            blit_scaled(cv, tmp, cx0 + 20, cy0 + 15, 147, 30)
+            draw_text(cv, cx0, cy0 + 57, "%d · %s" % (num, kick), 9, True,
                       RED_DK)
-            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 42, pill)
+            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 49, pill)
             hlines = wrap_text(head, 14, True, cardw)
-            draw_lines(cv, cx0, cy0 + 60, hlines, 14, 15, True, INK)
-            dlines = wrap_text(deck, 10, False, cardw)
-            draw_lines(cv, cx0, cy0 + 60 + 15 * len(hlines) + 2, dlines,
-                       10, 11, False, INK_SOFT)
+            draw_lines(cv, cx0, cy0 + 65, hlines, 14, 15, True, INK)
+            dlines = wrap_text(deck, 11, False, cardw)
+            draw_lines(cv, cx0, cy0 + 65 + 15 * len(hlines) + 2, dlines,
+                       11, 12, False, INK_SOFT)
     y += 2 * cardh + 6
     cv.hline(MX, y, CW, (200, 192, 172), 1)
     y += 8
@@ -1113,17 +1209,16 @@ def build():
               "on Thursday 26 November 2026 (UTC). Left out as earlier news:",
               9, False, INK_SOFT)
     dc_y = y + 20
-    dccolw = (CW - 16 - 3 * 12) // 4
-    for ci in range(4):
-        col_items = DATE_CHECK[ci * 3:(ci + 1) * 3]
-        cxx = MX + 8 + ci * (dccolw + 12)
-        for ri, item in enumerate(col_items):
-            n = ci * 3 + ri + 1
-            yy = dc_y + ri * 21
-            draw_text(cv, cxx, yy + 9, "%d." % n, 9, True, RED_DK)
-            lines = wrap_text(item, 9, False, dccolw - 16)
-            draw_lines(cv, cxx + 14, yy, lines[:2], 9, 11, False, INK)
-    dc_y += 3 * 21 + 2
+    # v1.6: the 12 DATE CHECK items as flowing prose (same items, same
+    # words, same order — only the grid layout is gone), the shape the top
+    # entries use. Measured: 3 lines at 9px (2 lines is not reachable at a
+    # readable size: 707 chars need ~2,900px at 9px vs 960px available).
+    # Frees ~29px vs the grid — that funds the card chips + 11px decks.
+    dc_prose = "  ·  ".join("%d. %s" % (i + 1, it)
+                            for i, it in enumerate(DATE_CHECK))
+    plines = wrap_text(dc_prose, 9, False, CW - 16)
+    draw_lines(cv, MX + 8, dc_y, plines, 9, 11, False, INK)
+    dc_y += 11 * len(plines) + 4
     # MORE row: +50% word spacing (space 2.0 -> 3.0px at 8px), leading 10 -> 11,
     # max width 960 -> 944 so no line ends near the right border; the 2px
     # saved in the gap above keeps the page bottom margin unchanged.
