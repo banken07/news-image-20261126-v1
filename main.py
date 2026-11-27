@@ -430,9 +430,9 @@ LEADS = [
     {
         "num": 1, "kick": "WASHINGTON · TRADE", "pill": "REPORTED",
         "head": "US proposes tariffs on 14 partners",
-        "deck": ("India 25%, Japan 15%, China 20% in some reports. EU rejects "
-                 "the premise; Brazil calls it unacceptable; Asia rebounds as "
-                 "levies look milder."),
+        "deck": ("India 25%, Japan 15%, China & Vietnam 20% in some reports. "
+                 "EU rejects the premise; Brazil calls it unacceptable; Asia "
+                 "rebounds as levies look milder."),
         "meta": "BBC, France 24, Japan Times · USTR order, Wed",
         "scene": "tariffs",
     },
@@ -619,9 +619,15 @@ def scene_tariffs(cv, x, y, w, h):
     cv.fill_rect(x, y, w, h, (238, 232, 216))
     cv.fill_rect(x, y + h - 16, w, 16, (214, 226, 236))
     base = y + h - 16
-    bars = [("INDIA", 25, RED), ("JAPAN", 15, GOLD), ("CHINA", 20, BLUE)]
-    bw, gap = 40, 24
-    bx = x + 118 + (200 - (3 * bw + 2 * gap)) // 2
+    # v1.9: 4 bars — Vietnam 20% added (RESEARCH.md: "China and Vietnam
+    # 20%"; the deck now says "China & Vietnam 20%"). Narrower bars
+    # (34/18) so all four fit; the v1.8 3-bar chart left the hero's
+    # top-right empty and carried one fewer verified number than the
+    # top entries' heroes.
+    bars = [("INDIA", 25, RED), ("JAPAN", 15, GOLD), ("CHINA", 20, BLUE),
+            ("VIETNAM", 20, BLUE)]
+    bw, gap = 34, 18
+    bx = x + 118 + (200 - (4 * bw + 3 * gap)) // 2
     for i, (lab, val, col) in enumerate(bars):
         bh = int(val * 1.28)
         xx = bx + i * (bw + gap)
@@ -648,14 +654,18 @@ def scene_refinery(cv, x, y, w, h):
     # smoke plume A over the mid vent stack, drifting left — v1.5 fix:
     # lumpy rx (6,8,6,9,7,10,8) so the silhouette edge waves instead of
     # reading as a straight grey bar; wider max rx for a billowing column
-    for (sx, sy, rx, ry, col) in [(150, 44, 6, 4, (98, 94, 88)),
-                                  (148, 38, 8, 5, (104, 100, 94)),
-                                  (150, 32, 6, 5, (112, 108, 102)),
-                                  (147, 26, 9, 5, (120, 116, 110)),
-                                  (149, 20, 7, 5, (128, 124, 118)),
-                                  (146, 14, 10, 5, (138, 134, 128)),
-                                  (147, 8, 8, 4, (148, 144, 138)),
-                                  (145, 4, 7, 3, (156, 152, 146))]:
+    # v1.9: plume A shifted +12px right (with its vent stack) — the
+    # v1.8 plume's left sliver (x+136..148) hid behind the "4 DRONES
+    # DOWNED" chip's right edge (ends x+146); now clears it by 2px
+    # and still clears the BRENT chip's left edge (x+170) by 2px.
+    for (sx, sy, rx, ry, col) in [(162, 44, 6, 4, (98, 94, 88)),
+                                  (160, 38, 8, 5, (104, 100, 94)),
+                                  (162, 32, 6, 5, (112, 108, 102)),
+                                  (159, 26, 9, 5, (120, 116, 110)),
+                                  (161, 20, 7, 5, (128, 124, 118)),
+                                  (158, 14, 10, 5, (138, 134, 128)),
+                                  (159, 8, 8, 4, (148, 144, 138)),
+                                  (157, 4, 7, 3, (156, 152, 146))]:
         cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
     # smoke plume B over the second stack, drifting right
     for (sx, sy, rx, ry, col) in [(264, 30, 6, 4, (98, 94, 88)),
@@ -664,12 +674,15 @@ def scene_refinery(cv, x, y, w, h):
                                   (267, 12, 9, 5, (124, 120, 114)),
                                   (265, 6, 8, 4, (134, 130, 124))]:
         cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
-    # distillation tower with platforms
-    cv.fill_rect(x + 18, y + 16, 14, h - 16, (38, 34, 36))
+    # distillation tower with platforms — v1.9: top at y+20 (was y+16):
+    # the v1.8 tower's top 3px hid behind the "550,000 BPD" chip
+    # (chip bottom y+19, tower top y+16); invisible (both near-black)
+    # but a real overlap, now 1px clear.
+    cv.fill_rect(x + 18, y + 20, 14, h - 20, (38, 34, 36))
     for py in (26, 36, 46):
         cv.fill_rect(x + 14, y + py, 22, 2, (120, 116, 110))
-    # mid vent stack
-    cv.fill_rect(x + 148, y + 44, 5, h - 44, (38, 34, 36))
+    # mid vent stack — v1.9: moved +12px with plume A (see above)
+    cv.fill_rect(x + 160, y + 44, 5, h - 44, (38, 34, 36))
     # storage tanks with highlight bands
     cv.fill_circle(x + 88, y + h - 14, 13, (52, 46, 48))
     cv.fill_circle(x + 116, y + h - 12, 11, (52, 46, 48))
@@ -852,8 +865,11 @@ def draw_icon(cv, x, y, w, h, key):
         # edge grazed the top line's top edge
         for sy in (cy - 4, cy + 3, cy + 10):
             cv.fill_rect(cx - 72, sy - 1, 16, 3, (38, 42, 48))
-        # strike burst at the nose (the Kyiv strike)
-        bx, by = cx + 64, cy + 1
+        # strike burst ON the jet (the Kyiv strike) — v1.9: centre moved
+        # from the nose tip (cx+64) to the fuselage (cx+8): the v1.8
+        # burst sat past the nose and read as the jet firing forward,
+        # not being hit. The gold cockpit (cx+24) stays clear of it.
+        bx, by = cx + 8, cy + 1
         burst = []
         for k in range(12):
             a = k * 3.14159265 / 6.0
@@ -1010,6 +1026,11 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly([(cx + 62, cy - 10), (cx + 52, cy - 15),
                       (cx + 52, cy - 5)], RED)
     elif key == "flood":
+        # v1.9: whole motif +2px down — the v1.8 front peak's snow apex
+        # (917,596) touched the S13 chip's paper bottom border row
+        # (y=596); same colour so invisible, but a real touch. Now the
+        # apex sits at y=598, 1px clear of the chip.
+        cy = cy + 2
         # v1.5: layered mountain terrain (three ridges) + rescue cross —
         # the front ridge makes the disaster terrain read, not just triangles
         cv.fill_poly([(cx - 52, cy + 14), (cx - 14, cy - 14), (cx + 18, cy + 14)],
@@ -1128,10 +1149,14 @@ def draw_map(cv, x, y, w, h):
     # v1.8: the v1.7 pure-longitude splits were schematic-wrong — Ireland
     # and Iberia read UK-gold (both are EU members, so EUROPE green is
     # correct there) and Arabia/Iran/Central Asia read SOUTH ASIA purple.
+    # v1.9: ME/SA boundary lon 63 (was 66/60 — the overlap zone
+    # lon 60..66, lat 12..38, i.e. western Pakistan/Balochistan,
+    # read MIDDLE EAST orange; the Iran/Pakistan border is ~lon 63,
+    # so lon <63 stays ME, lon >=63 is SOUTH ASIA).
     # Box rules now: UK = Great Britain (lon -6..2, lat >= 50) or
     # Northern Ireland (lon -8..-5, lat 54..55.5); MIDDLE EAST =
-    # lon 26..66, lat 12..42 (Turkey south, Levant, Arabia, Iraq, Iran);
-    # SOUTH ASIA = lon 60..100, lat 5..38 (Pakistan, India, Nepal,
+    # lon 26..63, lat 12..42 (Turkey south, Levant, Arabia, Iraq, Iran);
+    # SOUTH ASIA = lon 63..100, lat 5..38 (Pakistan, India, Nepal,
     # Bangladesh, Sri Lanka); the rest of Asia = EAST ASIA. Pins are
     # still placed by exact lon/lat and fall on the right side —
     # Mumbai/Kathmandu west, Seoul/Hong Kong east; London west, Kyiv/
@@ -1167,9 +1192,9 @@ def draw_map(cv, x, y, w, h):
                             (54 <= lat <= 55.5 and -8 <= lon <= -5) \
                             else "EUROPE"
                     elif ci == 4:  # Asia: MIDDLE EAST / SOUTH / EAST
-                        if 26 <= lon <= 66 and 12 <= lat <= 42:
+                        if 26 <= lon <= 63 and 12 <= lat <= 42:
                             reg = "MIDDLE EAST"
-                        elif 60 <= lon <= 100 and 5 <= lat < 38:
+                        elif 63 <= lon <= 100 and 5 <= lat < 38:
                             reg = "SOUTH ASIA"
                         else:
                             reg = "EAST ASIA"
