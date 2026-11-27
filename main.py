@@ -654,226 +654,200 @@ def draw_chip(cv, x, y, num, lab, region):
 
 # ---- schematic scenes for the three leads (drawn in code, flat vector)
 def scene_tariffs(cv, x, y, w, h):
-    # v2.1: dark trading-terminal background (was cream = the page
-    # itself). Layered navy bands + faint gridlines + a small globe:
-    # the chart now reads as a market screen, not a bare chart on paper.
-    cv.fill_rect(x, y, w, h, (14, 22, 40))
-    cv.fill_rect(x, y + 20, w, 24, (20, 34, 62))
-    cv.fill_rect(x, y + 44, w, h - 44, (10, 16, 30))
+    # v2.2: hero redrawn for the 110px box (was 64px) — same trading
+    # terminal, motifs grown ~1.5x: bigger globe, taller bars, deeper
+    # bands. All facts unchanged (India 25 / Japan 15 / China 20 /
+    # Vietnam 20, USTR proposal).
+    cv.fill_rect(x, y, w, 30, (14, 22, 40))
+    cv.fill_rect(x, y + 30, w, 36, (20, 34, 62))
+    cv.fill_rect(x, y + 66, w, h - 66, (10, 16, 30))
     for gx in range(12, w, 24):
         cv.fill_rect(x + gx, y, 1, h, (28, 46, 80))
-    for gy in (16, 32, 48):
+    for gy in (22, 44, 88):
         cv.fill_rect(x, y + gy, w, 1, (28, 46, 80))
-    # small globe, left of the chart (global trade)
-    gx, gy = x + 58, y + 38
-    cv.fill_circle(gx, gy, 15, (96, 168, 232))
-    cv.fill_ellipse(gx, gy, 15, 6, (140, 196, 240))
-    cv.fill_ellipse(gx, gy, 6, 15, (140, 196, 240))
-    base = y + h - 16
-    # v1.9: 4 bars — Vietnam 20% added (RESEARCH.md: "China and Vietnam
-    # 20%"). v2.1: brighter fills + white axis/labels for the dark screen.
+    # globe, bigger (r 22) — global trade
+    gx, gy = x + 62, y + 48
+    cv.fill_circle(gx, gy, 22, (96, 168, 232))
+    cv.fill_ellipse(gx, gy, 22, 9, (140, 196, 240))
+    cv.fill_ellipse(gx, gy, 9, 22, (140, 196, 240))
+    base = y + h - 18
     bars = [("INDIA", 25, (224, 64, 52)), ("JAPAN", 15, (250, 200, 70)),
             ("CHINA", 20, (96, 168, 232)), ("VIETNAM", 20, (96, 168, 232))]
-    bw, gap = 34, 18
-    bx = x + 118 + (200 - (4 * bw + 3 * gap)) // 2
+    bw, gap = 38, 16
+    bx = x + 118
     for i, (lab, val, col) in enumerate(bars):
-        bh = int(val * 1.28)
+        bh = int(val * 2.0)
         xx = bx + i * (bw + gap)
         cv.fill_rect(xx, base - bh, bw, bh, col)
         cv.rect(xx, base - bh, bw, bh, (255, 255, 255), 1)
-        draw_text(cv, xx + bw // 2, base - bh - 4, "%d%%" % val, 11, True,
+        draw_text(cv, xx + bw // 2, base - bh - 6, "%d%%" % val, 12, True,
                   (255, 255, 255), "c")
-        draw_text(cv, xx + bw // 2, base + 12, lab, 8, True,
+        draw_text(cv, xx + bw // 2, base + 12, lab, 9, True,
                   (255, 255, 255), "c")
-    cv.fill_rect(bx - 8, y + 20, 3, base - y - 20, (255, 255, 255))
+    cv.fill_rect(bx - 8, y + 30, 3, base - y - 30, (255, 255, 255))
     cv.fill_rect(x, base, w, 3, (255, 255, 255))
     cv.fill_rect(x + 4, y + 4, 96, 15, PAPER)
     draw_text(cv, x + 8, y + 15, "USTR PROPOSAL", 9, True, INK)
 
 
 def scene_refinery(cv, x, y, w, h):
-    # v2.1: dusk sky deepens to purple at the top (was flat orange);
-    # stars + two Houthi drones in the sky — the attack itself was
-    # invisible in v2.0 (only its smoke). Structures unchanged below.
-    cv.fill_rect(x, y, w, 18, (56, 34, 74))
-    cv.fill_rect(x, y + 18, w, 22, (226, 148, 74))
-    cv.fill_rect(x, y + 40, w, 12, (198, 96, 52))
-    cv.fill_rect(x, y + 52, w, h - 52, (74, 48, 52))
+    # v2.2: hero redrawn for the 110px box — same refinery, taller sky
+    # (stars + 2 bigger drones), taller plumes, taller tower, bigger
+    # tanks and flame. BRENT chip moves to y+52 (was y+24) so the
+    # taller flare flame (apex y+16, base y+34) clears it.
+    cv.fill_rect(x, y, w, 30, (56, 34, 74))
+    cv.fill_rect(x, y + 30, w, 28, (226, 148, 74))
+    cv.fill_rect(x, y + 58, w, 16, (198, 96, 52))
+    cv.fill_rect(x, y + 74, w, h - 74, (74, 48, 52))
     for (sx, sy) in [(120, 7), (150, 12), (200, 6), (232, 6), (290, 7),
-                     (305, 12)]:
+                     (305, 12), (90, 16), (270, 20)]:
         cv.fill_circle(x + sx, y + sy, 1, (255, 255, 255))
-    # drones: small quadcopter silhouettes (body + 4 rotors)
-    for (dx, dy) in [(130, 10), (245, 12)]:
-        cv.fill_rect(x + dx - 4, y + dy, 8, 3, (26, 24, 20))
-        for rx in (dx - 6, dx + 4):
-            cv.fill_circle(x + rx, y + dy - 2, 2, (26, 24, 20))
-    # smoke plume A over the mid vent stack, drifting left — v1.5 fix:
-    # lumpy rx (6,8,6,9,7,10,8) so the silhouette edge waves instead of
-    # reading as a straight grey bar; wider max rx for a billowing column
-    # v1.9: plume A shifted +12px right (with its vent stack) — the
-    # v1.8 plume's left sliver (x+136..148) hid behind the "4 DRONES
-    # DOWNED" chip's right edge (ends x+146); now clears it by 2px
-    # and still clears the BRENT chip's left edge (x+170) by 2px.
-    for (sx, sy, rx, ry, col) in [(162, 44, 6, 4, (98, 94, 88)),
-                                  (160, 38, 8, 5, (104, 100, 94)),
-                                  (162, 32, 6, 5, (112, 108, 102)),
-                                  (159, 26, 9, 5, (120, 116, 110)),
-                                  (161, 20, 7, 5, (128, 124, 118)),
-                                  (158, 14, 10, 5, (138, 134, 128)),
-                                  (159, 8, 8, 4, (148, 144, 138)),
-                                  (157, 4, 7, 3, (156, 152, 146))]:
+    # drones, bigger (body 10x4, rotors r3)
+    for (dx, dy) in [(130, 14), (245, 18)]:
+        cv.fill_rect(x + dx - 5, y + dy, 10, 4, (26, 24, 20))
+        for rx in (dx - 7, dx + 5):
+            cv.fill_circle(x + rx, y + dy - 2, 3, (26, 24, 20))
+    # smoke plume A over the mid vent stack (top y+62), drifting left
+    for (sx, sy, rx, ry, col) in [(162, 54, 7, 5, (98, 94, 88)),
+                                  (160, 46, 9, 5, (104, 100, 94)),
+                                  (162, 38, 7, 6, (112, 108, 102)),
+                                  (159, 30, 10, 5, (120, 116, 110)),
+                                  (161, 22, 8, 5, (128, 124, 118)),
+                                  (158, 14, 11, 5, (138, 134, 128)),
+                                  (159, 8, 8, 4, (148, 144, 138))]:
         cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
-    # smoke plume B over the second stack, drifting right
-    for (sx, sy, rx, ry, col) in [(264, 30, 6, 4, (98, 94, 88)),
-                                  (266, 24, 8, 4, (106, 102, 96)),
-                                  (264, 18, 6, 5, (114, 110, 104)),
-                                  (267, 12, 9, 5, (124, 120, 114)),
-                                  (265, 6, 8, 4, (134, 130, 124))]:
+    # smoke plume B over the second stack (top y+44), drifting right
+    for (sx, sy, rx, ry, col) in [(266, 48, 7, 5, (98, 94, 88)),
+                                  (264, 40, 9, 5, (106, 102, 96)),
+                                  (267, 32, 7, 5, (114, 110, 104)),
+                                  (265, 24, 10, 5, (124, 120, 114)),
+                                  (266, 16, 8, 4, (134, 130, 124))]:
         cv.fill_ellipse(x + sx, y + sy, rx, ry, col)
-    # distillation tower with platforms — v1.9: top at y+20 (was y+16):
-    # the v1.8 tower's top 3px hid behind the "550,000 BPD" chip
-    # (chip bottom y+19, tower top y+16); invisible (both near-black)
-    # but a real overlap, now 1px clear.
-    cv.fill_rect(x + 18, y + 20, 14, h - 20, (38, 34, 36))
-    for py in (26, 36, 46):
-        cv.fill_rect(x + 14, y + py, 22, 2, (120, 116, 110))
-    # mid vent stack — v1.9: moved +12px with plume A (see above)
-    cv.fill_rect(x + 160, y + 44, 5, h - 44, (38, 34, 36))
-    # storage tanks with highlight bands
-    cv.fill_circle(x + 88, y + h - 14, 13, (52, 46, 48))
-    cv.fill_circle(x + 116, y + h - 12, 11, (52, 46, 48))
+    # distillation tower, top y+34 (clears the 550,000 BPD chip by 15px)
+    cv.fill_rect(x + 18, y + 34, 16, h - 34, (38, 34, 36))
+    for py in (44, 56, 68):
+        cv.fill_rect(x + 14, y + py, 24, 3, (120, 116, 110))
+    # mid vent stack (feeds plume A)
+    cv.fill_rect(x + 160, y + 62, 6, h - 62, (38, 34, 36))
+    # storage tanks, bigger (first tank centred y+h-16 so its r16 base
+    # lands exactly on the scene floor)
+    cv.fill_circle(x + 88, y + h - 16, 16, (52, 46, 48))
+    cv.fill_circle(x + 118, y + h - 12, 14, (52, 46, 48))
     cv.fill_rect(x + 81, y + h - 22, 14, 2, (120, 116, 110))
     cv.fill_rect(x + 110, y + h - 20, 12, 2, (120, 116, 110))
-    # flare stack + flame
-    cv.fill_rect(x + 206, y + 20, 8, h - 20, (38, 34, 36))
-    fx, fy = x + 210, y + 20
-    cv.fill_poly([(fx - 6, fy), (fx, fy - 14), (fx + 6, fy)], (232, 120, 30))
-    cv.fill_poly([(fx - 3, fy), (fx, fy - 8), (fx + 3, fy)], (250, 205, 80))
+    # flare stack + bigger flame (base y+34, apex y+16)
+    cv.fill_rect(x + 206, y + 34, 9, h - 34, (38, 34, 36))
+    fx, fy = x + 210, y + 34
+    cv.fill_poly([(fx - 7, fy), (fx, fy - 18), (fx + 7, fy)], (232, 120, 30))
+    cv.fill_poly([(fx - 4, fy), (fx, fy - 10), (fx + 4, fy)], (250, 205, 80))
     # second stack (feeds plume B)
-    cv.fill_rect(x + 260, y + 30, 8, h - 30, (38, 34, 36))
+    cv.fill_rect(x + 260, y + 44, 9, h - 44, (38, 34, 36))
     # connecting pipe, tower -> tanks
-    cv.fill_rect(x + 32, y + h - 24, 44, 3, (38, 34, 36))
+    cv.fill_rect(x + 34, y + h - 26, 44, 3, (38, 34, 36))
     cv.fill_rect(x + 4, y + 4, 104, 15, INK)
     draw_text(cv, x + 8, y + 15, "550,000 BPD", 9, True, (255, 255, 255))
-    # v1.6: visible in-scene data — Brent move (mid band, right of the vent
-    # stack; the first placement at y+6 hid the flare flame, so it sits
-    # below it now) and drones downed (mid band, between tower and tanks);
-    # both facts are already in this lead's deck, now visible without
-    # reading the deck
-    cv.fill_rect(x + 170, y + 24, 88, 15, INK)
-    draw_text(cv, x + 174, y + 35, "BRENT +3.5%", 9, True, (255, 255, 255))
+    cv.fill_rect(x + 170, y + 52, 88, 15, INK)
+    draw_text(cv, x + 174, y + 63, "BRENT +3.5%", 9, True, (255, 255, 255))
     cv.fill_rect(x + 40, y + 26, 106, 15, INK)
     draw_text(cv, x + 44, y + 37, "4 DRONES DOWNED", 9, True,
               (255, 255, 255))
 
 
 def scene_parade(cv, x, y, w, h):
-    # storm sky bands
-    cv.fill_rect(x, y, w, 30, (96, 104, 116))
-    cv.fill_rect(x, y + 30, w, 26, (72, 80, 92))
-    cv.fill_rect(x, y + 56, w, h - 56, (52, 58, 66))
+    # v2.2: hero redrawn for the 110px box — same nor'easter parade,
+    # motifs grown ~1.5x: bigger balloon (rx 42), taller skyline,
+    # more crowd, bigger storm clouds + lightning. Facts unchanged
+    # (100th, Sat 08:30, gusts 60 mph).
+    cv.fill_rect(x, y, w, 40, (96, 104, 116))
+    cv.fill_rect(x, y + 40, w, 38, (72, 80, 92))
+    cv.fill_rect(x, y + 78, w, h - 78, (52, 58, 66))
     # wind-driven rain, slanted hard sideways
     for rx in range(14, w, 26):
-        for ry in range(6, 52, 14):
+        for ry in range(6, 86, 14):
             cv.line(x + rx, y + ry, x + rx - 9, y + ry + 6, (200, 206, 214))
-    # wind streaks — v1.7: thicker (2 -> 3px) and longer, the wind reads
-    for (sx, sy, ln) in [(120, 12, 80), (220, 22, 80), (30, 46, 70)]:
+    # wind streaks, thicker and longer
+    for (sx, sy, ln) in [(120, 16, 90), (220, 30, 90), (30, 64, 80)]:
         cv.fill_rect(x + sx, y + sy, ln, 3, (220, 226, 232))
-    # v2.1: storm clouds (dark, above the skyline) + a lightning bolt
-    # between balloon and float — the nor'easter itself was only rain
-    # streaks in v2.0; now the storm has a shape of its own.
-    cv.fill_ellipse(x + 100, y + 6, 26, 8, (60, 66, 78))
-    cv.fill_ellipse(x + 140, y + 8, 24, 7, (60, 66, 78))
-    stroke3(cv, [(x + 252, y + 20), (x + 246, y + 30), (x + 254, y + 30),
-                 (x + 246, y + 40)], (250, 205, 80))
-    # Manhattan skyline, low background only (not the main motif)
-    heights = [16, 24, 18, 28, 14, 22, 26, 18, 20, 14]
+    # storm clouds + lightning bolt
+    cv.fill_ellipse(x + 100, y + 8, 30, 10, (60, 66, 78))
+    cv.fill_ellipse(x + 145, y + 10, 28, 9, (60, 66, 78))
+    stroke3(cv, [(x + 252, y + 26), (x + 246, y + 40), (x + 254, y + 40),
+                 (x + 246, y + 56)], (250, 205, 80))
+    # Manhattan skyline, taller
+    heights = [24, 36, 28, 42, 22, 34, 40, 28, 30, 22]
     bx = x + 8
     for i, hh in enumerate(heights):
         cv.fill_rect(bx + i * 30, y + h - hh, 24, hh, (26, 24, 20))
         for wy in range(5, hh - 4, 10):
             cv.fill_rect(bx + i * 30 + 5, y + h - hh + wy, 3, 4,
                          (250, 205, 80))
-    # v2.1: parade crowd silhouettes along the street, in front of the
-    # skyline — the parade is watched, not just a balloon over rooftops.
-    for cxp in (30, 55, 80, 105, 130, 155):
-        cv.fill_circle(x + cxp, y + h - 9, 3, (26, 24, 20))
-        cv.fill_rect(x + cxp - 4, y + h - 6, 8, 6, (26, 24, 20))
-    # big balloon, tilted by the wind (top leaning right) — the parade
-    # motif. v1.5 fix: rounder (rx 40, ry 26) — the first version was so
-    # flat (48x20) it read as a leaf/disc, not a balloon.
-    # v1.6: shrunk (rx 30, ry 20) and desaturated — it was the largest
-    # saturated red block in the hero and read as decoration, not data
-    # v1.7: centre moved right (170 -> 185) so the new red label bar at the
-    # left does not cut into the balloon's lower-left edge
-    bcx, bcy = x + 185, y + 30
+    # parade crowd silhouettes along the street
+    for cxp in (25, 50, 75, 100, 125, 150, 175, 200):
+        cv.fill_circle(x + cxp, y + h - 12, 4, (26, 24, 20))
+        cv.fill_rect(x + cxp - 5, y + h - 8, 10, 8, (26, 24, 20))
+    # big balloon, tilted by the wind — bigger (rx 42, ry 28)
+    bcx, bcy = x + 190, y + 44
     t = 0.28
     ct, st = _cos(t), _sin(t)
     pts = []
     for k in range(28):
         a = k * 2 * 3.14159265 / 28.0
         ca, sa = _cos(a), _sin(a)
-        px = bcx + 30 * ca * ct - 20 * sa * st
-        py = bcy + 30 * ca * st + 20 * sa * ct
+        px = bcx + 42 * ca * ct - 28 * sa * st
+        py = bcy + 42 * ca * st + 28 * sa * ct
         pts.append((int(round(px)), int(round(py))))
     cv.fill_poly(pts, BALLOON_RED)
-    # darker fold band across the balloon belly
     pts2 = []
     for k in range(28):
         a = k * 2 * 3.14159265 / 28.0
         ca, sa = _cos(a), _sin(a)
-        px = bcx + 4 + 21 * ca * ct - 7 * sa * st
-        py = bcy + 10 + 21 * ca * st + 7 * sa * ct
+        px = bcx + 4 + 30 * ca * ct - 10 * sa * st
+        py = bcy + 12 + 30 * ca * st + 10 * sa * ct
         pts2.append((int(round(px)), int(round(py))))
     cv.fill_poly(pts2, BALLOON_DK)
-    # v1.8: balloon volume — a pale sheen on the upper-left + two panel
-    # seams following the tilt. The v1.7 balloon was a flat red oval; the
-    # top entries' hero scenes carry layered detail, and the sheen is the
-    # cheapest way to give the balloon depth without new facts.
-    cv.fill_ellipse(bcx - 12, bcy - 10, 9, 5, (205, 105, 92))
-    stroke3(cv, [(bcx - 10, bcy - 17), (bcx - 12, bcy),
-                 (bcx - 10, bcy + 17)], BALLOON_DK)
-    stroke3(cv, [(bcx + 8, bcy - 16), (bcx + 10, bcy + 1),
-                 (bcx + 8, bcy + 17)], BALLOON_DK)
-    # v2.1: a second, smaller gold balloon trailing behind the main one
-    # — a parade is a train of balloons, not one balloon alone.
-    cv.fill_ellipse(x + 105, y + 13, 11, 8, GOLD)
-    cv.fill_ellipse(x + 101, y + 10, 4, 3, (250, 205, 80))
-    cv.line(x + 100, y + 20, x + 94, y + 28, (26, 24, 20))
-    cv.line(x + 110, y + 20, x + 114, y + 28, (26, 24, 20))
-    # ropes trailing down-left from the balloon (kept inside the scene box)
-    cv.line(bcx - 20, bcy + 13, bcx - 32, bcy + 30, (26, 24, 20))
-    cv.line(bcx + 14, bcy + 14, bcx + 5, bcy + 32, (26, 24, 20))
+    cv.fill_ellipse(bcx - 16, bcy - 14, 12, 7, (205, 105, 92))
+    stroke3(cv, [(bcx - 14, bcy - 24), (bcx - 17, bcy),
+                 (bcx - 14, bcy + 24)], BALLOON_DK)
+    stroke3(cv, [(bcx + 11, bcy - 23), (bcx + 14, bcy + 1),
+                 (bcx + 11, bcy + 24)], BALLOON_DK)
+    # second, smaller gold balloon trailing behind (moved right so the
+    # bigger 100TH text clears it)
+    cv.fill_ellipse(x + 122, y + 26, 14, 10, GOLD)
+    cv.fill_ellipse(x + 118, y + 23, 5, 4, (250, 205, 80))
+    cv.line(x + 122, y + 32, x + 116, y + 42, (26, 24, 20))
+    cv.line(x + 132, y + 32, x + 136, y + 42, (26, 24, 20))
+    # ropes trailing down-left from the balloon
+    cv.line(bcx - 28, bcy + 18, bcx - 42, bcy + 42, (26, 24, 20))
+    cv.line(bcx + 18, bcy + 19, bcx + 6, bcy + 44, (26, 24, 20))
     # confetti blown sideways
     for (ccx, ccy, col) in [(230, 10, GOLD), (250, 16, (250, 205, 80)),
                             (280, 12, BLUE), (300, 20, (248, 244, 233)),
                             (270, 30, GOLD), (300, 34, (250, 205, 80)),
                             (240, 40, RED), (130, 44, GOLD),
-                            (100, 50, RED), (290, 46, BLUE)]:
+                            (100, 50, RED), (290, 46, BLUE),
+                            (260, 58, GOLD), (180, 64, RED),
+                            (140, 70, BLUE), (310, 62, GOLD),
+                            (90, 66, (250, 205, 80))]:
         cv.fill_rect(x + ccx, y + ccy, 5, 2, col)
     # parade float (platform + flags) bottom right
-    cv.fill_rect(x + 238, y + h - 12, 64, 8, (26, 24, 20))
-    cv.fill_rect(x + 244, y + h - 26, 3, 14, (26, 24, 20))
-    cv.fill_poly([(x + 247, y + h - 26), (x + 259, y + h - 23),
-                  (x + 247, y + h - 20)], RED)
-    cv.fill_rect(x + 286, y + h - 26, 3, 14, (26, 24, 20))
-    cv.fill_poly([(x + 289, y + h - 26), (x + 301, y + h - 23),
-                  (x + 289, y + h - 20)], GOLD)
-    # v1.6: the old small "100TH · SAT 08:30" chip becomes visible data —
-    # a big "100TH" badge + "SAT 08:30" on the sky, and a "GUSTS 60 MPH"
-    # chip top-right (both facts already in this lead's deck)
-    draw_text(cv, x + 8, y + 28, "100TH", 22, True, (255, 255, 255))
+    cv.fill_rect(x + 238, y + h - 16, 64, 10, (26, 24, 20))
+    cv.fill_rect(x + 244, y + h - 34, 3, 18, (26, 24, 20))
+    cv.fill_poly([(x + 247, y + h - 34), (x + 259, y + h - 31),
+                  (x + 247, y + h - 28)], RED)
+    cv.fill_rect(x + 286, y + h - 34, 3, 18, (26, 24, 20))
+    cv.fill_poly([(x + 289, y + h - 34), (x + 301, y + h - 31),
+                  (x + 289, y + h - 28)], GOLD)
+    # "100TH" badge, bigger (30px)
+    draw_text(cv, x + 8, y + 42, "100TH", 30, True, (255, 255, 255))
     cv.fill_rect(x + w - 96, y + 4, 92, 15, INK)
     draw_text(cv, x + w - 92, y + 15, "GUSTS 60 MPH", 9, True,
               (255, 255, 255))
-    # v1.7: red in-scene label bar (tidy-meteor's "RAS TANURA HIT" trick) —
-    # the postponement + the new time in one bar; "SAT 08:30" moves here
-    # from its old spot (same words, same facts). Drawn after the ropes so
-    # it sits cleanly on top; the balloon's left edge is behind it.
+    # red in-scene label bar — drawn last, sits on top of the balloon's
+    # lower-left edge (same pattern as v2.1)
     bar_txt = "PARADE POSTPONED — SAT 08:30"
     bw = int(text_width(bar_txt, 9, True)) + 12
-    cv.fill_rect(x + 8, y + 32, bw, 14, RED)
-    draw_text(cv, x + 14, y + 43, bar_txt, 9, True, (255, 255, 255))
+    cv.fill_rect(x + 8, y + 46, bw, 16, RED)
+    draw_text(cv, x + 14, y + 58, bar_txt, 9, True, (255, 255, 255))
 
 
 SCENES = {"tariffs": scene_tariffs, "refinery": scene_refinery,
@@ -964,7 +938,7 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_ellipse(cx + 24, cy - 2, 7, 3, (250, 205, 80))
         # v1.8: speed lines shifted +2px — the taller v1.8 chip's bottom
         # edge grazed the top line's top edge
-        for sy in (cy - 4, cy + 3, cy + 10):
+        for sy in (cy - 1, cy + 6, cy + 13):
             cv.fill_rect(cx - 72, sy - 1, 16, 3, (38, 42, 48))
         # strike burst ON the jet (the Kyiv strike) — v1.9: centre moved
         # from the nose tip (cx+64) to the fuselage (cx+8): the v1.8
@@ -996,7 +970,7 @@ def draw_icon(cv, x, y, w, h, key):
         # covered the Y-axis top and the V-line's first (dip) point; the
         # axis top now clears the chip bottom by 2px, and the baseline
         # still sits 7px above the scene floor.
-        cy = cy + 10
+        cy = cy + 13
         cv.fill_rect(cx - 70, cy - 13, 3, 26, (255, 255, 255))
         cv.fill_rect(cx - 70, cy + 10, 140, 3, (255, 255, 255))
         cv.fill_rect(cx - 58, cy - 4, 12, 14, (96, 168, 232))
@@ -1011,7 +985,7 @@ def draw_icon(cv, x, y, w, h, key):
         for i, col in enumerate([(96, 168, 232), (240, 80, 60),
                                  (250, 200, 70), (96, 168, 232),
                                  (240, 80, 60)]):
-            cv.fill_rect(x + 20 + i * 10, y + 55, 5, 4, col)
+            cv.fill_rect(x + 20 + i * 10, y + h - 5, 5, 4, col)
     elif key == "train":
         # v2.1: Underground station background (was flat solid red) —
         # green tile top + platform band + dark track, a tunnel arch
@@ -1033,7 +1007,7 @@ def draw_icon(cv, x, y, w, h, key):
         # v1.8: centre cy-2 -> cy+5 — the v1.7 chip clipped the ring's top
         # (4px; 6px with the taller v1.8 chip); the ring top now clears
         # the chip bottom by 1px and its base still clears the track line
-        ry = cy + 5
+        ry = cy + 8
         cv.fill_circle(cx - 56, ry, 9, (248, 244, 233))
         cv.fill_circle(cx - 56, ry, 6, RED)
         cv.fill_rect(cx - 68, ry - 2, 24, 4, BLUE)
@@ -1104,8 +1078,8 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_ellipse(x + 29, y + 38, 11, 9, (212, 128, 78))
         # row of small candles, bottom-right
         for ccx in (140, 155, 170):
-            cv.fill_rect(x + ccx, y + 48, 3, 8, (248, 244, 233))
-            cv.fill_circle(x + ccx + 1, y + 45, 2, (250, 205, 80))
+            cv.fill_rect(x + ccx, y + 44, 3, 8, (248, 244, 233))
+            cv.fill_circle(x + ccx + 1, y + 41, 2, (250, 205, 80))
         # v1.5: solemn memorial wreath with REAL leaf shapes (v1.2 leaves
         # were 2px dots that read as beads) + flame, Mumbai
         for k in range(12):
@@ -1160,9 +1134,9 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly([(cx + 6, cy - 6), (cx + 8, cy - 12), (cx + 10, cy - 6)],
                      (250, 205, 80))
         # fire-truck ladder, bottom-right to the second tower
-        stroke3(cv, [(x + 178, y + 58), (x + 142, y + 32)], RED)
-        stroke3(cv, [(x + 175, y + 58), (x + 139, y + 32)], RED)
-        for (rx0, ry0) in [(167, 52), (160, 46), (153, 41), (146, 36)]:
+        stroke3(cv, [(x + 178, y + 52), (x + 142, y + 32)], RED)
+        stroke3(cv, [(x + 175, y + 52), (x + 139, y + 32)], RED)
+        for (rx0, ry0) in [(167, 46), (160, 40), (153, 35), (146, 30)]:
             cv.line(x + rx0, y + ry0, x + rx0 + 3, y + ry0 - 4, RED)
     elif key == "chess":
         # v2.1: layered green-felt background (was cream = the page) —
@@ -1203,11 +1177,11 @@ def draw_icon(cv, x, y, w, h, key):
         # paper. The rising-rate arrow is unchanged.
         cv.fill_rect(x, y + 20, w, 18, (56, 132, 142))
         cv.fill_rect(x, y + 38, w, h - 38, (24, 30, 36))
-        for (bx0, by0, bw0, bh0) in [(8, 46, 10, 14), (22, 42, 12, 18),
-                                     (38, 48, 10, 12), (140, 44, 12, 16),
-                                     (156, 48, 10, 12), (170, 42, 12, 18)]:
+        for (bx0, by0, bw0, bh0) in [(8, 44, 10, 10), (22, 40, 12, 14),
+                                     (38, 46, 10, 8), (140, 42, 12, 12),
+                                     (156, 46, 10, 8), (170, 40, 12, 14)]:
             cv.fill_rect(x + bx0, y + by0, bw0, bh0, (16, 22, 28))
-        for (wx, wy) in [(11, 50), (25, 46), (143, 48), (173, 46)]:
+        for (wx, wy) in [(11, 47), (25, 43), (143, 45), (173, 43)]:
             cv.fill_rect(x + wx, y + wy, 2, 3, (250, 205, 80))
         # light pavement strip under the bank's base (the dark base
         # would otherwise vanish into the dark skyline band)
@@ -1501,12 +1475,12 @@ def build():
     for i, (val, lab) in enumerate(STATS):
         bx = MX + i * sw
         if i:
-            cv.vline(bx, y + 6, 44, (200, 192, 172), 1)
-        draw_text(cv, bx + sw // 2, y + 31, val, 32, True, RED_DK, "c")
-        draw_text(cv, bx + sw // 2, y + 46, lab, 9, True, INK_SOFT, "c")
-    y += 52
+            cv.vline(bx, y + 4, 38, (200, 192, 172), 1)
+        draw_text(cv, bx + sw // 2, y + 26, val, 32, True, RED_DK, "c")
+        draw_text(cv, bx + sw // 2, y + 40, lab, 9, True, INK_SOFT, "c")
+    y += 43
     cv.hline(MX, y, CW, RULE, 1)
-    y += 4
+    y += 3
     # region bar: segments proportional to story counts (must total 35) —
     # v1.7: 8 segments; the last takes the remainder so rounding never
     # overshoots the 976px content width by a pixel.
@@ -1536,7 +1510,7 @@ def build():
     fields_txt = "FIELDS   " + "  ·  ".join("%s %d" % (n, c)
                                             for (n, c) in FIELDS)
     draw_text(cv, MX + CW // 2, y + 12, fields_txt, 9, True, INK, "c")
-    y += 18
+    y += 15
     # timeline: THE DAY IN UTC — title at left, nodes shifted right of it
     tl_y = y + 20
     draw_text(cv, MX, tl_y + 4, "THE DAY IN UTC", 10, True, INK)
@@ -1547,9 +1521,9 @@ def build():
         cv.fill_circle(cx, tl_y, 4, RED)
         draw_text(cv, cx, tl_y - 5, tm, 11, True, RED_DK, "c")
         lines = wrap_text(lab, 9, False, tw - 14)
-        draw_lines(cv, cx - (tw - 14) // 2, tl_y + 6, lines, 9, 11,
+        draw_lines(cv, cx - (tw - 14) // 2, tl_y + 6, lines, 9, 10,
                    False, INK_SOFT, "l", tw - 14)
-    y += 46
+    y += 45
     # ---- three leads
     lw = (CW - 2 * 11) // 3
     lead_top = y
@@ -1558,8 +1532,8 @@ def build():
         draw_text(cv, lx, y + 11, "%d · %s" % (lead["num"], lead["kick"]), 10,
                   True, RED_DK)
         pw = draw_pill(cv, lx + lw - 62, y, lead["pill"])
-        SCENES[lead["scene"]](cv, lx, y + 16, lw, 64)
-        hy = y + 16 + 64 + 6
+        SCENES[lead["scene"]](cv, lx, y + 16, lw, 110)
+        hy = y + 16 + 110 + 6  # v2.2: was 64 — headline sat on the hero
         lines = wrap_text(lead["head"], 20, True, lw)
         draw_lines(cv, lx, hy, lines, 20, 21, True, INK)
         dy = hy + 21 * len(lines) + 2
@@ -1573,9 +1547,9 @@ def build():
         draw_text(cv, lx, wy, lead["why"], 10, True, RED)
         my = wy + 8
         draw_text(cv, lx, my, lead["meta"], 9, False, INK_SOFT)
-    y = lead_top + 16 + 64 + 6 + 2 * 21 + 2 + 2 * 12 + 12 + 8 + 5
+    y = lead_top + 16 + 110 + 6 + 2 * 21 + 2 + 2 * 12 + 12 + 8 + 3
     cv.hline(MX, y, CW, (200, 192, 172), 1)
-    y += 6
+    y += 4
     # ---- small cards: 5 across x 2 rows
     # v1.7: each card is a mini-scene — the v1.5 illustration is drawn
     # natively into a 187x60 scene box (same absolute motif size as v1.5,
@@ -1583,31 +1557,31 @@ def build():
     # INSIDE the scene's top-left corner (the v1.6 black full-width band is
     # gone). Kicker/headline/deck keep the v1.6 geometry below the scene.
     cardw = (CW - 4 * 10) // 5
-    cardh = 144
+    cardh = 138
     for row in range(2):
         for col in range(5):
             idx = row * 5 + col
             num, kick, pill, head, deck, icon = SMALL[idx]
             cx0 = MX + col * (cardw + 10)
             cy0 = y + row * (cardh + 4)
-            draw_icon(cv, cx0, cy0, cardw, 60, icon)
+            draw_icon(cv, cx0, cy0, cardw, 54, icon)
             cn, cl, creg = CHIPS[num]
             cdx, cdy = CHIP_POS.get(num, (4, 2))
             draw_chip(cv, cx0 + cdx, cy0 + cdy, cn, cl, creg)
-            draw_text(cv, cx0, cy0 + 68, "%d · %s" % (num, kick), 9, True,
+            draw_text(cv, cx0, cy0 + 62, "%d · %s" % (num, kick), 9, True,
                       RED_DK)
-            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 60, pill)
+            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 56, pill)
             hlines = wrap_text(head, 14, True, cardw)
-            draw_lines(cv, cx0, cy0 + 76, hlines, 14, 15, True, INK)
+            draw_lines(cv, cx0, cy0 + 70, hlines, 14, 15, True, INK)
             dlines = wrap_text(deck, 11, False, cardw)
-            draw_lines(cv, cx0, cy0 + 76 + 15 * len(hlines) + 2, dlines,
+            draw_lines(cv, cx0, cy0 + 70 + 15 * len(hlines) + 2, dlines,
                        11, 12, False, INK_SOFT)
     y += 2 * cardh + 4
     cv.hline(MX, y, CW, (200, 192, 172), 1)
-    y += 6
+    y += 4
     # ---- map LEFT + ALSO list RIGHT
     mapw = 300
-    maph = 166
+    maph = 152
     draw_text(cv, MX, y + 11, "WHERE IT HAPPENED — STORIES 1–13", 11, True,
               INK)
     draw_map(cv, MX, y + 16, mapw, maph - 16)
@@ -1633,7 +1607,7 @@ def build():
             text = item + " (%s)" % outlet
             lines = wrap_text(text, 10, False, colw - 18)
             draw_lines(cv, cxx + 18, yy, lines[:2], 10, 11, False, INK)
-    y += maph + 18
+    y += 179  # v2.2: ALSO floor (8 rows end y+179); map 152
     # ---- DATE CHECK, red-bordered
     dc_top = y
     cv.rect(MX, y, CW, 2, RED, 2)
@@ -1642,7 +1616,7 @@ def build():
               "Every story above happened or was first reported or developing "
               "on Thursday 26 November 2026 (UTC). Left out as earlier news:",
               9, False, INK_SOFT)
-    dc_y = y + 20
+    dc_y = y + 18
     # v1.6: the 12 DATE CHECK items as flowing prose (same items, same
     # words, same order — only the grid layout is gone), the shape the top
     # entries use. Measured: 3 lines at 9px (2 lines is not reachable at a
@@ -1652,27 +1626,27 @@ def build():
                             for i, it in enumerate(DATE_CHECK))
     plines = wrap_text(dc_prose, 9, False, CW - 16)
     draw_lines(cv, MX + 8, dc_y, plines, 9, 10, False, INK)
-    dc_y += 10 * len(plines) + 4
+    dc_y += 10 * len(plines) + 2
     # MORE row: +50% word spacing (space 2.0 -> 3.0px at 8px), leading 10 -> 11,
     # max width 960 -> 944 so no line ends near the right border; the 2px
     # saved in the gap above keeps the page bottom margin unchanged.
     mlines = wrap_text(MORE_CHECKED, 8, False, CW - 32, space_extra=1.0)
     draw_lines(cv, MX + 8, dc_y, mlines, 8, 10, False, INK_SOFT,
                space_extra=1.0)
-    dc_bottom = dc_y + 10 * len(mlines) + 6
+    dc_bottom = dc_y + 10 * len(mlines) + 4
     cv.rect(MX, dc_top, CW, dc_bottom - dc_top, RED, 2)
-    y = dc_bottom + 4  # v1.7: 5 -> 4 (vertical budget for the FIELDS strip)
+    y = dc_bottom + 3
     # ---- footer
-    draw_text(cv, MX, y + 9,
+    draw_text(cv, MX, y + 8,
               "OFFICIAL = authority’s own figure or act · REPORTED = press "
               "report · CLAIM = one side’s account. Drawn from verified "
               "reporting; every story first reported or developing Thu 26 Nov "
               "2026 unless dated in DATE CHECK.", 9, False, INK_SOFT)
-    y += 11
-    draw_text(cv, MX, y + 9,
+    y += 10
+    draw_text(cv, MX, y + 8,
               "Sources: Reuters, AP, BBC, CNN, Yonhap, TfL, FIDE, The Hindu, "
               "Guardian, Africanews", 9, False, INK_SOFT)
-    y += 11
+    y += 10
     return cv, y
 
 
