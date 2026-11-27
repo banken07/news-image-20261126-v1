@@ -654,44 +654,59 @@ def draw_chip(cv, x, y, num, lab, region):
 
 # ---- schematic scenes for the three leads (drawn in code, flat vector)
 def scene_tariffs(cv, x, y, w, h):
-    # v1.5: clean chart panel as the focus — the container ship crowded the
-    # chart and told the wrong story, so it is dropped; 3 proportional bars
-    # (India 25 red, Japan 15 gold, China 20 blue) carry the tariff story
-    cv.fill_rect(x, y, w, h, (238, 232, 216))
-    cv.fill_rect(x, y + h - 16, w, 16, (214, 226, 236))
+    # v2.1: dark trading-terminal background (was cream = the page
+    # itself). Layered navy bands + faint gridlines + a small globe:
+    # the chart now reads as a market screen, not a bare chart on paper.
+    cv.fill_rect(x, y, w, h, (14, 22, 40))
+    cv.fill_rect(x, y + 20, w, 24, (20, 34, 62))
+    cv.fill_rect(x, y + 44, w, h - 44, (10, 16, 30))
+    for gx in range(12, w, 24):
+        cv.fill_rect(x + gx, y, 1, h, (28, 46, 80))
+    for gy in (16, 32, 48):
+        cv.fill_rect(x, y + gy, w, 1, (28, 46, 80))
+    # small globe, left of the chart (global trade)
+    gx, gy = x + 58, y + 38
+    cv.fill_circle(gx, gy, 15, (96, 168, 232))
+    cv.fill_ellipse(gx, gy, 15, 6, (140, 196, 240))
+    cv.fill_ellipse(gx, gy, 6, 15, (140, 196, 240))
     base = y + h - 16
     # v1.9: 4 bars — Vietnam 20% added (RESEARCH.md: "China and Vietnam
-    # 20%"; the deck now says "China & Vietnam 20%"). Narrower bars
-    # (34/18) so all four fit; the v1.8 3-bar chart left the hero's
-    # top-right empty and carried one fewer verified number than the
-    # top entries' heroes.
-    bars = [("INDIA", 25, RED), ("JAPAN", 15, GOLD), ("CHINA", 20, BLUE),
-            ("VIETNAM", 20, BLUE)]
+    # 20%"). v2.1: brighter fills + white axis/labels for the dark screen.
+    bars = [("INDIA", 25, (224, 64, 52)), ("JAPAN", 15, (250, 200, 70)),
+            ("CHINA", 20, (96, 168, 232)), ("VIETNAM", 20, (96, 168, 232))]
     bw, gap = 34, 18
     bx = x + 118 + (200 - (4 * bw + 3 * gap)) // 2
     for i, (lab, val, col) in enumerate(bars):
         bh = int(val * 1.28)
         xx = bx + i * (bw + gap)
         cv.fill_rect(xx, base - bh, bw, bh, col)
-        cv.rect(xx, base - bh, bw, bh, INK, 1)
+        cv.rect(xx, base - bh, bw, bh, (255, 255, 255), 1)
         draw_text(cv, xx + bw // 2, base - bh - 4, "%d%%" % val, 11, True,
-                  INK, "c")
-        draw_text(cv, xx + bw // 2, base + 12, lab, 8, True, INK, "c")
-    cv.fill_rect(bx - 8, y + 20, 3, base - y - 20, INK)  # vertical axis
-    cv.fill_rect(x, base, w, 3, INK)  # baseline
-    cv.fill_rect(x + 4, y + 4, 96, 15, INK)
-    draw_text(cv, x + 8, y + 15, "USTR PROPOSAL", 9, True, (255, 255, 255))
+                  (255, 255, 255), "c")
+        draw_text(cv, xx + bw // 2, base + 12, lab, 8, True,
+                  (255, 255, 255), "c")
+    cv.fill_rect(bx - 8, y + 20, 3, base - y - 20, (255, 255, 255))
+    cv.fill_rect(x, base, w, 3, (255, 255, 255))
+    cv.fill_rect(x + 4, y + 4, 96, 15, PAPER)
+    draw_text(cv, x + 8, y + 15, "USTR PROPOSAL", 9, True, INK)
 
 
 def scene_refinery(cv, x, y, w, h):
-    # dusk bands
-    cv.fill_rect(x, y, w, 26, (226, 148, 74))
-    cv.fill_rect(x, y + 26, w, 26, (198, 96, 52))
+    # v2.1: dusk sky deepens to purple at the top (was flat orange);
+    # stars + two Houthi drones in the sky — the attack itself was
+    # invisible in v2.0 (only its smoke). Structures unchanged below.
+    cv.fill_rect(x, y, w, 18, (56, 34, 74))
+    cv.fill_rect(x, y + 18, w, 22, (226, 148, 74))
+    cv.fill_rect(x, y + 40, w, 12, (198, 96, 52))
     cv.fill_rect(x, y + 52, w, h - 52, (74, 48, 52))
-    # v1.5: clearer structures — distillation tower (left), storage tanks
-    # (mid), flare stack with flame (right), second stack, connecting pipe,
-    # and TWO rising smoke columns (v1.4 lesson: vertical, narrow dark
-    # root, widening and paling upward, no whole discs, no horizontal blob)
+    for (sx, sy) in [(120, 7), (150, 12), (200, 6), (232, 6), (290, 7),
+                     (305, 12)]:
+        cv.fill_circle(x + sx, y + sy, 1, (255, 255, 255))
+    # drones: small quadcopter silhouettes (body + 4 rotors)
+    for (dx, dy) in [(130, 10), (245, 12)]:
+        cv.fill_rect(x + dx - 4, y + dy, 8, 3, (26, 24, 20))
+        for rx in (dx - 6, dx + 4):
+            cv.fill_circle(x + rx, y + dy - 2, 2, (26, 24, 20))
     # smoke plume A over the mid vent stack, drifting left — v1.5 fix:
     # lumpy rx (6,8,6,9,7,10,8) so the silhouette edge waves instead of
     # reading as a straight grey bar; wider max rx for a billowing column
@@ -764,6 +779,13 @@ def scene_parade(cv, x, y, w, h):
     # wind streaks — v1.7: thicker (2 -> 3px) and longer, the wind reads
     for (sx, sy, ln) in [(120, 12, 80), (220, 22, 80), (30, 46, 70)]:
         cv.fill_rect(x + sx, y + sy, ln, 3, (220, 226, 232))
+    # v2.1: storm clouds (dark, above the skyline) + a lightning bolt
+    # between balloon and float — the nor'easter itself was only rain
+    # streaks in v2.0; now the storm has a shape of its own.
+    cv.fill_ellipse(x + 100, y + 6, 26, 8, (60, 66, 78))
+    cv.fill_ellipse(x + 140, y + 8, 24, 7, (60, 66, 78))
+    stroke3(cv, [(x + 252, y + 20), (x + 246, y + 30), (x + 254, y + 30),
+                 (x + 246, y + 40)], (250, 205, 80))
     # Manhattan skyline, low background only (not the main motif)
     heights = [16, 24, 18, 28, 14, 22, 26, 18, 20, 14]
     bx = x + 8
@@ -772,6 +794,11 @@ def scene_parade(cv, x, y, w, h):
         for wy in range(5, hh - 4, 10):
             cv.fill_rect(bx + i * 30 + 5, y + h - hh + wy, 3, 4,
                          (250, 205, 80))
+    # v2.1: parade crowd silhouettes along the street, in front of the
+    # skyline — the parade is watched, not just a balloon over rooftops.
+    for cxp in (30, 55, 80, 105, 130, 155):
+        cv.fill_circle(x + cxp, y + h - 9, 3, (26, 24, 20))
+        cv.fill_rect(x + cxp - 4, y + h - 6, 8, 6, (26, 24, 20))
     # big balloon, tilted by the wind (top leaning right) — the parade
     # motif. v1.5 fix: rounder (rx 40, ry 26) — the first version was so
     # flat (48x20) it read as a leaf/disc, not a balloon.
@@ -808,6 +835,12 @@ def scene_parade(cv, x, y, w, h):
                  (bcx - 10, bcy + 17)], BALLOON_DK)
     stroke3(cv, [(bcx + 8, bcy - 16), (bcx + 10, bcy + 1),
                  (bcx + 8, bcy + 17)], BALLOON_DK)
+    # v2.1: a second, smaller gold balloon trailing behind the main one
+    # — a parade is a train of balloons, not one balloon alone.
+    cv.fill_ellipse(x + 105, y + 13, 11, 8, GOLD)
+    cv.fill_ellipse(x + 101, y + 10, 4, 3, (250, 205, 80))
+    cv.line(x + 100, y + 20, x + 94, y + 28, (26, 24, 20))
+    cv.line(x + 110, y + 20, x + 114, y + 28, (26, 24, 20))
     # ropes trailing down-left from the balloon (kept inside the scene box)
     cv.line(bcx - 20, bcy + 13, bcx - 32, bcy + 30, (26, 24, 20))
     cv.line(bcx + 14, bcy + 14, bcx + 5, bcy + 32, (26, 24, 20))
@@ -864,15 +897,24 @@ def stroke3(cv, pts, c):
 
 
 def draw_icon(cv, x, y, w, h, key):
-    bg = {"flame": (58, 44, 40), "jet": (206, 220, 232),
-          "chart": (238, 232, 216), "train": (176, 32, 28),
-          "flag": (38, 74, 118), "candle": (52, 48, 44),
-          "chess": (238, 232, 216), "bank": (226, 220, 200),
-          "memorial": (52, 48, 44), "flood": (206, 220, 232),
-          "ebola": (206, 220, 232)}[key]
+    # v2.1: each bg is now the TOP band of a layered background (sky) —
+    # mid + ground bands are painted inside each branch. No two scenes
+    # share a top colour, and none is the page cream.
+    bg = {"flame": (58, 36, 76), "jet": (244, 176, 122),
+          "chart": (12, 46, 40), "train": (18, 58, 46),
+          "flag": (26, 54, 104), "candle": (84, 50, 94),
+          "chess": (22, 68, 42), "bank": (22, 80, 92),
+          "memorial": (14, 18, 32), "flood": (206, 220, 232),
+          "ebola": (26, 74, 40)}[key]
     cv.fill_rect(x, y, w, h, bg)
     cx, cy = x + w // 2, y + h // 2
     if key == "flame":
+        # v2.1: layered dusk background (was flat dark brown) — purple
+        # sky + orange horizon + dark road, pale moon top-right, and a
+        # second charred car so the pile-up reads, not just one truck.
+        cv.fill_rect(x, y + 22, w, 14, (214, 128, 62))
+        cv.fill_rect(x, y + 36, w, h - 36, (36, 32, 32))
+        cv.fill_circle(x + 168, y + 10, 6, (240, 230, 200))
         # v1.5: road fuel tanker with fire + smoke on a highway
         cv.fill_rect(x, cy + 13, w, 6, (38, 34, 36))  # road band
         cv.fill_rect(x, cy + 15, w, 1, (248, 244, 233))  # centre line
@@ -894,7 +936,24 @@ def draw_icon(cv, x, y, w, h, key):
         for wx in (cx - 42, cx - 18, cx + 17):
             cv.fill_circle(wx, cy + 14, 4, INK)
             cv.fill_circle(wx, cy + 14, 2, (248, 244, 233))
+        # second charred car, right of the tanker (27 vehicles charred)
+        cv.fill_rect(x + 146, cy + 2, 28, 9, (22, 20, 20))
+        cv.fill_poly([(x + 152, cy + 2), (x + 155, cy - 5),
+                      (x + 158, cy + 2)], (232, 120, 30))
+        for wx in (x + 152, x + 168):
+            cv.fill_circle(wx, cy + 12, 3, INK)
     elif key == "jet":
+        # v2.1: layered dawn background (was flat pale blue, shared with
+        # S13) — pink-orange dawn sky + low sun + dark runway strip with
+        # dashes + a smoke column rising right of the jet (airbase hit).
+        cv.fill_rect(x, y + 20, w, 18, (232, 120, 80))
+        cv.fill_rect(x, y + 38, w, h - 38, (44, 38, 44))
+        cv.fill_circle(x + 168, y + 10, 8, (255, 236, 190))
+        for dx in (20, 60, 100, 140):
+            cv.fill_rect(x + dx, y + 50, 6, 2, (248, 244, 233))
+        for (sx, sy, rx, ry) in [(162, 34, 5, 3), (160, 40, 6, 3),
+                                 (163, 46, 5, 3)]:
+            cv.fill_ellipse(x + sx, y + sy, rx, ry, (120, 116, 110))
         # fighter jet (side view, nose right) + 3px speed lines
         cv.fill_poly([(cx - 48, cy - 2), (cx + 30, cy - 4), (cx + 58, cy + 1),
                       (cx + 30, cy + 6), (cx - 48, cy + 6)], (38, 42, 48))
@@ -921,6 +980,16 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly(burst, (232, 120, 30))
         cv.fill_circle(bx, by, 3, (250, 205, 80))
     elif key == "chart":
+        # v2.1: dark trading-screen background (was cream = the page) —
+        # deep teal bands + faint gridlines + a ticker strip of squares
+        # along the floor, so the plunge-and-recover reads as a market
+        # screen, not a bare chart on paper. Brighter bars/line for dark.
+        cv.fill_rect(x, y + 20, w, 20, (18, 64, 54))
+        cv.fill_rect(x, y + 40, w, h - 40, (8, 32, 30))
+        for gx in range(10, w, 20):
+            cv.fill_rect(x + gx, y, 1, h, (40, 90, 80))
+        for gy in (15, 30, 45):
+            cv.fill_rect(x, y + gy, w, 1, (40, 90, 80))
         # v1.5: axes + bars + a line that PLUNGES then RECOVERS (V / dip and
         # rise) — v1.2 only rose, which was wrong for the Nasdaq story.
         # v1.8: the whole chart sits 10px lower (cy+10) — the v1.7 chip
@@ -928,17 +997,36 @@ def draw_icon(cv, x, y, w, h, key):
         # axis top now clears the chip bottom by 2px, and the baseline
         # still sits 7px above the scene floor.
         cy = cy + 10
-        cv.fill_rect(cx - 70, cy - 13, 3, 26, INK)
-        cv.fill_rect(cx - 70, cy + 10, 140, 3, INK)
-        cv.fill_rect(cx - 58, cy - 4, 12, 14, BLUE)
-        cv.fill_rect(cx - 40, cy + 5, 12, 5, GOLD)
-        cv.fill_rect(cx - 22, cy - 6, 12, 16, BLUE)
+        cv.fill_rect(cx - 70, cy - 13, 3, 26, (255, 255, 255))
+        cv.fill_rect(cx - 70, cy + 10, 140, 3, (255, 255, 255))
+        cv.fill_rect(cx - 58, cy - 4, 12, 14, (96, 168, 232))
+        cv.fill_rect(cx - 40, cy + 5, 12, 5, (250, 200, 70))
+        cv.fill_rect(cx - 22, cy - 6, 12, 16, (96, 168, 232))
         pts = [(cx - 58, cy - 12), (cx - 36, cy + 6), (cx - 14, cy - 4),
                (cx + 8, cy - 12), (cx + 36, cy - 16)]
-        stroke3(cv, pts, RED)
+        stroke3(cv, pts, (240, 80, 60))
         cv.fill_poly([(cx + 38, cy - 17), (cx + 26, cy - 15), (cx + 34, cy - 7)],
-                     RED)
+                     (240, 80, 60))
+        # ticker strip along the floor
+        for i, col in enumerate([(96, 168, 232), (240, 80, 60),
+                                 (250, 200, 70), (96, 168, 232),
+                                 (240, 80, 60)]):
+            cv.fill_rect(x + 20 + i * 10, y + 55, 5, 4, col)
     elif key == "train":
+        # v2.1: Underground station background (was flat solid red) —
+        # green tile top + platform band + dark track, a tunnel arch
+        # behind the train and a hanging lamp top-right. The strike now
+        # has a station to happen in.
+        cv.fill_rect(x, y + 18, w, 26, (198, 188, 158))
+        cv.fill_rect(x, y + 44, w, h - 44, (28, 26, 26))
+        # tunnel portal behind the train (rect + rounded top) — v2.1
+        # first attempt drew one huge filled arch that swallowed the
+        # platform band and the barrier; the portal keeps the platform
+        # visible on both sides.
+        cv.fill_rect(cx - 62, cy - 14, 124, 38, (12, 16, 14))
+        cv.fill_ellipse(cx, cy - 14, 62, 12, (12, 16, 14))
+        cv.fill_circle(x + 168, y + 8, 4, (250, 205, 80))
+        cv.fill_rect(x + 167, y + 12, 2, 6, (250, 205, 80))
         # v1.5: subway front view + London Underground roundel (left) and a
         # closed crossing barrier (right) — the strike halting service
         # roundel: paper ring, red disc, blue bar (shapes, no text)
@@ -958,7 +1046,7 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(cx - 20, cy + 2, 40, 3, GOLD)
         cv.fill_circle(cx - 16, cy + 9, 3, GOLD)
         cv.fill_circle(cx + 16, cy + 9, 3, GOLD)
-        cv.fill_rect(cx - 34, cy + 16, 68, 3, INK)
+        cv.fill_rect(cx - 34, cy + 16, 68, 3, (198, 188, 158))
         # closed barrier across the track, right of the train
         cv.fill_rect(cx + 40, cy + 6, 3, 10, INK)
         cv.fill_rect(cx + 66, cy + 6, 3, 10, INK)
@@ -966,6 +1054,14 @@ def draw_icon(cv, x, y, w, h, key):
             col = (248, 244, 233) if i % 2 == 0 else INK
             cv.fill_rect(cx + 43 + i * 5, cy + 8, 5, 4, col)
     elif key == "flag":
+        # v2.1: layered EU-blue background (was flat solid blue) —
+        # lighter blue horizon + dark floor + a ring of gold stars across
+        # the sky, so the euro document reads as EU, not just money.
+        cv.fill_rect(x, y + 22, w, 18, (44, 84, 150))
+        cv.fill_rect(x, y + 40, w, h - 40, (30, 44, 88))
+        for (sx, sy) in [(72, 8), (88, 6), (104, 9), (120, 6), (140, 8),
+                         (158, 6), (174, 9)]:
+            cv.fill_circle(x + sx, y + sy, 2, (250, 205, 80))
         # financial document with vector euro sign (no text) + rule lines
         cv.fill_rect(cx - 28, cy - 14, 56, 28, (248, 244, 233))
         cv.rect(cx - 28, cy - 14, 56, 28, INK, 3)
@@ -993,6 +1089,23 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly([(cx + 62, cy - 1), (cx + 70, cy - 1), (cx + 66, cy + 5)],
                      GOLD)
     elif key == "candle":
+        # v2.1: layered Mumbai-dusk background (was flat dark, shared
+        # with S12) — purple sky + orange sunset + dark ground, the
+        # Gateway of India arch behind the wreath and a row of small
+        # candles at the foot, so the tribute has a place, not a void.
+        cv.fill_rect(x, y + 20, w, 18, (212, 128, 78))
+        cv.fill_rect(x, y + 38, w, h - 38, (38, 34, 36))
+        # Gateway arch silhouette, left of the wreath (below the chip)
+        cv.fill_ellipse(x + 29, y + 34, 20, 8, (30, 26, 30))
+        cv.fill_rect(x + 12, y + 34, 6, 18, (30, 26, 30))
+        cv.fill_rect(x + 40, y + 34, 6, 18, (30, 26, 30))
+        # arch opening, sunset orange showing through (v2.1 fix: the
+        # solid arch read as a dark mound; the opening makes it a gate)
+        cv.fill_ellipse(x + 29, y + 38, 11, 9, (212, 128, 78))
+        # row of small candles, bottom-right
+        for ccx in (140, 155, 170):
+            cv.fill_rect(x + ccx, y + 48, 3, 8, (248, 244, 233))
+            cv.fill_circle(x + ccx + 1, y + 45, 2, (250, 205, 80))
         # v1.5: solemn memorial wreath with REAL leaf shapes (v1.2 leaves
         # were 2px dots that read as beads) + flame, Mumbai
         for k in range(12):
@@ -1016,6 +1129,16 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly([(cx - 3, cy - 2), (cx, cy - 8), (cx + 3, cy - 2)],
                      (250, 205, 80))
     elif key == "memorial":
+        # v2.1: layered night background (was flat dark, shared with
+        # S9) — near-black night sky + orange fire-glow horizon + dark
+        # ground, a smoke column above the fire, a pale moon and a
+        # fire-truck ladder reaching the second tower.
+        cv.fill_rect(x, y + 22, w, 18, (196, 104, 48))
+        cv.fill_rect(x, y + 40, w, h - 40, (28, 26, 26))
+        cv.fill_circle(x + 168, y + 9, 5, (240, 230, 200))
+        for (sx, sy, rx, ry) in [(104, 5, 6, 3), (100, 9, 5, 3),
+                                 (108, 11, 4, 2)]:
+            cv.fill_ellipse(x + sx, y + sy, rx, ry, (140, 136, 130))
         # v1.5: high-rise on fire + "168" toll plaque (memorial, distinct
         # from the Mumbai wreath); keeps the v1.1 "168" plaque text
         cv.fill_rect(cx - 30, cy - 14, 26, 31, (238, 232, 216))
@@ -1036,7 +1159,27 @@ def draw_icon(cv, x, y, w, h, key):
                       (cx + 12, cy - 18), (cx + 15, cy - 6)], (232, 120, 30))
         cv.fill_poly([(cx + 6, cy - 6), (cx + 8, cy - 12), (cx + 10, cy - 6)],
                      (250, 205, 80))
+        # fire-truck ladder, bottom-right to the second tower
+        stroke3(cv, [(x + 178, y + 58), (x + 142, y + 32)], RED)
+        stroke3(cv, [(x + 175, y + 58), (x + 139, y + 32)], RED)
+        for (rx0, ry0) in [(167, 52), (160, 46), (153, 41), (146, 36)]:
+            cv.line(x + rx0, y + ry0, x + rx0 + 3, y + ry0 - 4, RED)
     elif key == "chess":
+        # v2.1: layered green-felt background (was cream = the page) —
+        # dark felt top + lighter felt + wood floor, a chess clock on the
+        # right and a white pawn on the left, so the match has a table,
+        # a clock and two sides, not a knight floating on paper.
+        cv.fill_rect(x, y + 24, w, 20, (30, 88, 54))
+        cv.fill_rect(x, y + 44, w, h - 44, (96, 68, 42))
+        # white pawn, left of the knight (below the chip)
+        cv.fill_circle(x + 30, y + 34, 4, (248, 244, 233))
+        cv.fill_rect(x + 25, y + 40, 10, 4, (248, 244, 233))
+        # chess clock, right of the board
+        cv.fill_rect(x + 156, y + 20, 28, 14, INK)
+        cv.fill_circle(x + 164, y + 27, 4, (248, 244, 233))
+        cv.fill_circle(x + 176, y + 27, 4, (248, 244, 233))
+        cv.line(x + 164, y + 27, x + 164, y + 24, INK)
+        cv.line(x + 176, y + 27, x + 178, y + 24, INK)
         # chess knight silhouette (facing right) on a gold base bar:
         # slim neck, ear spike, long muzzle, concave throat notch so the
         # head reads apart from the neck at card size
@@ -1054,6 +1197,21 @@ def draw_icon(cv, x, y, w, h, key):
                 col = INK if (r + c) % 2 == 0 else (248, 244, 233)
                 cv.fill_rect(cx + 34 + c * 8, cy - 10 + r * 8, 8, 8, col)
     elif key == "bank":
+        # v2.1: layered Seoul-dusk background (was beige ≈ the page) —
+        # teal dusk sky + lighter horizon + a dark skyline along the
+        # bottom with lit windows, so the bank stands in a city, not on
+        # paper. The rising-rate arrow is unchanged.
+        cv.fill_rect(x, y + 20, w, 18, (56, 132, 142))
+        cv.fill_rect(x, y + 38, w, h - 38, (24, 30, 36))
+        for (bx0, by0, bw0, bh0) in [(8, 46, 10, 14), (22, 42, 12, 18),
+                                     (38, 48, 10, 12), (140, 44, 12, 16),
+                                     (156, 48, 10, 12), (170, 42, 12, 18)]:
+            cv.fill_rect(x + bx0, y + by0, bw0, bh0, (16, 22, 28))
+        for (wx, wy) in [(11, 50), (25, 46), (143, 48), (173, 46)]:
+            cv.fill_rect(x + wx, y + wy, 2, 3, (250, 205, 80))
+        # light pavement strip under the bank's base (the dark base
+        # would otherwise vanish into the dark skyline band)
+        cv.fill_rect(cx - 40, cy + 14, 68, 4, (200, 192, 172))
         # classical bank (ink, high contrast) + red rising-rate arrow
         cv.fill_poly([(cx - 34, cy - 4), (cx - 6, cy - 15), (cx + 22, cy - 4)],
                      INK)
@@ -1089,12 +1247,33 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(cx + 43, cy - 1, 3, 14, RED)
         cv.fill_rect(cx + 37, cy + 5, 14, 3, RED)
     elif key == "ebola":
+        # v2.1: layered jungle background (was flat pale blue, shared
+        # with S5) — deep jungle green + lighter canopy + red earth,
+        # palm silhouettes at both edges and a Red Cross flag on a pole
+        # beside the worker, so the treatment centre sits in Congo,
+        # not on a blank blue card.
+        cv.fill_rect(x, y + 20, w, 18, (64, 124, 66))
+        cv.fill_rect(x, y + 38, w, h - 38, (104, 80, 50))
+        # left palm
+        stroke3(cv, [(x + 12, y + 52), (x + 10, y + 34)], (18, 52, 28))
+        stroke3(cv, [(x + 10, y + 34), (x + 2, y + 28)], (18, 52, 28))
+        stroke3(cv, [(x + 10, y + 34), (x + 20, y + 28)], (18, 52, 28))
+        stroke3(cv, [(x + 10, y + 34), (x + 4, y + 38)], (18, 52, 28))
+        # right palm
+        stroke3(cv, [(x + 176, y + 52), (x + 178, y + 34)], (18, 52, 28))
+        stroke3(cv, [(x + 178, y + 34), (x + 168, y + 28)], (18, 52, 28))
+        stroke3(cv, [(x + 178, y + 34), (x + 186, y + 30)], (18, 52, 28))
+        stroke3(cv, [(x + 178, y + 34), (x + 170, y + 38)], (18, 52, 28))
+        # Red Cross flag on a pole, left of the worker
+        cv.line(x + 118, y + 18, x + 118, y + 40, INK)
+        cv.fill_rect(x + 118, y + 16, 12, 8, (248, 244, 233))
+        cv.fill_rect(x + 122, y + 18, 3, 4, RED)
+        cv.fill_rect(x + 120, y + 19, 7, 2, RED)
         # v2.0: Ebola treatment centre — isolation tent + PPE health
         # worker + small virus motif. Respectful, no gore: the story is
         # the outbreak's scale (12,021 cases), not suffering. The chip
         # sits top-left (45px wide), so the tent apex is kept right of
         # x+61 and the worker right of x+127 — both clear of the chip.
-        cv.fill_rect(x, cy + 16, w, h - 46, (172, 178, 182))  # ground band
         # tent: white triangle, ink outline, dark door
         cv.fill_poly([(cx - 52, cy + 16), (cx - 22, cy - 14),
                       (cx + 8, cy + 16)], (248, 244, 233))
