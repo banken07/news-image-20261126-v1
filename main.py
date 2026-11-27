@@ -49,26 +49,32 @@ REGION_COLORS = [
     # A26 Paris (EUROPE), A27 Virgin strike (OCEANIA). New totals: EAST 4
     # + SOUTH 2 + ME 4 + AFRICA 4 + AM 9 + OC 4 + UK 3 + EUROPE 5 + WORLD 5
     # = 40. SOUTH ASIA 2 stays the narrow segment (49px, label at 7px).
+    # v2.4: LEAD REORDER — storm promoted to L1 (+1 AMERICAS), Ras Tanura
+    # demoted lead -> ALSO (still MIDDLE EAST), weakest ALSO (A14 Red Sea
+    # lakes, WORLD) dropped to keep the total at 40. New totals: EAST 4
+    # + SOUTH 2 + ME 4 + AFRICA 4 + AM 10 + OC 4 + UK 3 + EUROPE 5 + WORLD 4
+    # = 40.
     ("EAST ASIA", 4, (58, 96, 135)),
     ("SOUTH ASIA", 2, (122, 88, 130)),
     ("MIDDLE EAST", 4, (171, 91, 45)),
     ("AFRICA", 4, (178, 62, 104)),
-    ("AMERICAS", 9, (123, 58, 53)),
+    ("AMERICAS", 10, (123, 58, 53)),
     ("OCEANIA", 4, (55, 113, 111)),
     ("UK", 3, (158, 120, 50)),
     ("EUROPE", 5, (101, 113, 68)),
-    ("WORLD", 5, (80, 79, 75)),
+    ("WORLD", 4, (80, 79, 75)),
 ]
 # v1.7: topic fields — the same 40 stories regrouped by subject (main-story
 # fields are explicit in STORY-LIST.md kickers; ALSO items classified by
 # subject: A1/A2/A4 ECONOMY, A3/A8/A9 CONFLICT, A5/A6/A7/A15/A16/A18
 # SOCIETY, A10/A14 WORLD, A11/A17/A22 DISASTER, A12/A13/A19/A21 SPORT,
 # A20 CULTURE; v2.3 adds A23/A24 CONFLICT, A25 DISASTER, A26/A27 SOCIETY).
-# TRADE 1 + CONFLICT 7 + ECONOMY 6 + DISASTER 6 + SOCIETY 11 + SPORT 5 +
-# CULTURE 2 + WORLD 2 = 40.
+# TRADE 1 + CONFLICT 7 + ECONOMY 6 + DISASTER 7 + SOCIETY 11 + SPORT 5 +
+# CULTURE 2 + WORLD 1 = 40. v2.4: storm L1 is DISASTER (+1 vs v2.3);
+# Ras Tanura lead -> ALSO stays CONFLICT; A14 (WORLD) dropped (-1).
 FIELDS = [
-    ("TRADE", 1), ("CONFLICT", 7), ("ECONOMY", 6), ("DISASTER", 6),
-    ("SOCIETY", 11), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 2),
+    ("TRADE", 1), ("CONFLICT", 7), ("ECONOMY", 6), ("DISASTER", 7),
+    ("SOCIETY", 11), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 1),
 ]
 # v1.7: chip backgrounds = region colour darkened x0.78 so white bold text
 # keeps >=4:1 contrast (the plain bar colours are too light for the 8px
@@ -443,7 +449,26 @@ TIMELINE = [
 
 LEADS = [
     {
-        "num": 1, "kick": "WASHINGTON · TRADE", "pill": "REPORTED",
+        # v2.4: LEAD REORDER — the nor'easter is the new L1. The duel's
+        # remaining deciding factor was lead-trio strength: every top
+        # entry leads with the storm/Macy's, Kuwait or the EU summit,
+        # and the storm is the day's biggest visual story. Facts from
+        # RESEARCH.md story D (PowerOutage.us via Reuters / NWS): peak
+        # ~961,000 customers without power Thu evening; 454 flights
+        # cancelled, 2,411 delayed; Central Park 1.82 in rain.
+        "num": 1, "kick": "EAST COAST · DISASTER", "pill": "OFFICIAL",
+        "head": "Nor’easter cuts power to ~1M",
+        "deck": ("The nor’easter peaks at 961,000 customers without power "
+                 "Thu evening; 454 flights cancelled, 2,411 delayed."),
+        # v2.4: WHY IT MATTERS — ~1M in the dark at the peak (deck).
+        "why": "WHY IT MATTERS: ~1M in the dark at the peak.",
+        "meta": "PowerOutage.us via Reuters · NWS",
+        "scene": "storm",
+    },
+    {
+        # v2.4: tariffs demoted L1 -> L2 (content unchanged from v2.3 L1;
+        # the container-ship scene moves with it).
+        "num": 2, "kick": "WASHINGTON · TRADE", "pill": "REPORTED",
         "head": "US proposes tariffs on 14 partners",
         # v2.0: deck trimmed to 2 lines (was 3) to fund the WHY IT
         # MATTERS line below — drops "Asia rebounds as levies look
@@ -458,25 +483,13 @@ LEADS = [
         "scene": "tariffs",
     },
     {
-        "num": 2, "kick": "RAS TANURA · CONFLICT", "pill": "CLAIM",
-        "head": "Houthis claim Ras Tanura refinery hit",
-        # v2.0: deck UNCHANGED — already 2 lines (verified by measure).
-        "deck": ("Smoke seen by satellite over the 550,000-bpd plant. Coalition "
-                 "says 4 drones downed; Jazan port struck. Brent jumps 3.5%."),
-        # v2.0: WHY IT MATTERS — Brent +3.5% on Gulf fears (deck + ALSO A2).
-        "why": "WHY IT MATTERS: Brent jumped 3.5% on Gulf supply fears.",
-        "meta": "Reuters · claim: Houthis",
-        "scene": "refinery",
-    },
-    {
         "num": 3, "kick": "NEW YORK · CULTURE", "pill": "OFFICIAL",
         "head": "Macy’s 100th parade postponed",
-        # v2.3: deck reworded to carry the storm's power toll (D) — the
-        # same nor'easter peaked at ~961,000 customers without power Thu
-        # evening (PowerOutage.us via Reuters). Gusts 60 mph stay in the
-        # scene chip ("GUSTS 60 MPH"). Still 2 lines.
+        # v2.4: deck reverted to the v2.2 gusts wording — the storm's
+        # power toll now lives in L1 (it was folded into this deck in
+        # v2.3). Gusts 60 mph verified (NWS high wind warning, RESEARCH.md).
         "deck": ("First weather delay ever — the parade moves to Saturday "
-                 "8:30 a.m. as the nor’easter cuts power to ~1M."),
+                 "8:30 a.m. as a nor’easter brings gusts to 60 mph."),
         # v2.0: WHY IT MATTERS — first weather postponement in the
         # parade's 100-year history (deck + RESEARCH.md: suspended only
         # in WWII 1942-44).
@@ -586,7 +599,6 @@ ALSO = [
     ("Flinders Island fire destroys at least 6 homes", "OCEANIA", "Guardian"),
     ("Liverpool beat Club Brugge 3–0 in the Champions League", "UK", "BBC"),
     ("Lille beat Bayern 2–1, ending their unbeaten run", "EUROPE", "BBC"),
-    ("Rare lakes found beneath the Red Sea", "WORLD", "ScienceDaily"),
     ("Canadian astronaut welcomes a baby girl from orbit", "WORLD", "BBC"),
     ("Pig-kidney patient marks one year off dialysis", "AMERICAS", "CBC"),
     ("Famine risk falls in Baidoa, Somalia — but hunger persists", "AFRICA", "AllAfrica"),
@@ -606,6 +618,12 @@ ALSO = [
     ("Bangkok refinery blast injures 9, 3 critical; plant shut", "EAST ASIA", "AP"),
     ("Paris students march for funds; ~2,000, Bastille to Pantheon", "EUROPE", "Franceinfo"),
     ("Virgin Australia staff strike at 4 airports in pay row", "OCEANIA", "TravelTalk"),
+    # v2.4: Ras Tanura demoted lead -> ALSO (keeps the story on the page;
+    # the CLAIM wording stays in the text — never a verified fact).
+    # A14 (Red Sea lakes, WORLD) dropped — the weakest ALSO line, a
+    # science curiosity with no human/policy impact — so the total stays
+    # 40 after the storm's promotion to L1 (+1 AMERICAS).
+    ("Houthis claim refinery hit; 4 drones downed", "MIDDLE EAST", "Reuters"),
 ]
 
 DATE_CHECK = [
@@ -722,6 +740,58 @@ def scene_tariffs(cv, x, y, w, h):
     draw_text(cv, x + 288, y + 25, "25%", 16, True, (255, 255, 255), "c")
     draw_text(cv, x + 12, y + 10, "USTR PROPOSAL", 8, True,
               (255, 255, 255), "l")
+
+
+def scene_storm(cv, x, y, w, h):
+    # v2.4: NEW L1 hero — the nor'easter as ONE iconic motif: dark storm
+    # sky + lightning bolt + slanted rain + a leaning power pole with
+    # sagging wires (one snapped, sparking) + a dark unlit house +
+    # "~1M WITHOUT POWER" tag. Background: deep violet-grey storm,
+    # distinct from the L2 ship's navy (10,30,64) and the L3 parade's
+    # slate (96,104,116). The tag duplicates the stat-strip figure,
+    # the same pattern as the refinery's "550,000 BPD" chip.
+    cv.fill_rect(x, y, w, 44, (34, 30, 54))
+    cv.fill_rect(x, y + 44, w, 34, (58, 54, 82))
+    cv.fill_rect(x, y + 78, w, h - 78, (22, 24, 30))
+    # storm clouds, darker than the sky
+    cv.fill_ellipse(x + 70, y + 12, 46, 12, (18, 16, 30))
+    cv.fill_ellipse(x + 130, y + 8, 38, 10, (18, 16, 30))
+    cv.fill_ellipse(x + 250, y + 14, 40, 11, (24, 22, 38))
+    # slanted heavy rain (upper two-thirds)
+    for rx in range(12, w, 22):
+        for ry in range(22, 74, 16):
+            cv.line(x + rx, y + ry, x + rx - 8, y + ry + 7, (168, 178, 198))
+    # lightning bolt, centre-right (gold zigzag, 3px stroke)
+    stroke3(cv, [(x + 208, y + 22), (x + 196, y + 48), (x + 206, y + 48),
+                 (x + 190, y + 76)], (250, 205, 80))
+    # dark unlit house, bottom-left (no lit windows: no power)
+    cv.fill_rect(x + 12, y + 82, 52, 28, (14, 13, 16))
+    cv.fill_poly([(x + 8, y + 82), (x + 38, y + 64), (x + 68, y + 82)],
+                 (14, 13, 16))
+    cv.fill_rect(x + 20, y + 90, 8, 8, (22, 24, 30))
+    cv.fill_rect(x + 46, y + 90, 8, 8, (22, 24, 30))
+    # leaning power pole + crossarm, centre-left
+    stroke3(cv, [(x + 104, y + 108), (x + 122, y + 52)], (16, 14, 12))
+    stroke3(cv, [(x + 110, y + 62), (x + 134, y + 56)], (16, 14, 12))
+    # sagging wires from the pole top, one snapped with a spark
+    stroke3(cv, [(x + 122, y + 52), (x + 150, y + 66), (x + 178, y + 60)],
+            (16, 14, 12))
+    stroke3(cv, [(x + 122, y + 52), (x + 96, y + 66), (x + 76, y + 62)],
+            (16, 14, 12))
+    # spark burst at the snapped wire end
+    sx0, sy0 = x + 178, y + 60
+    for k in range(8):
+        a = k * 3.14159265 / 4.0
+        cv.line(sx0 + int(round(3 * _cos(a))), sy0 + int(round(3 * _sin(a))),
+                sx0 + int(round(7 * _cos(a))), sy0 + int(round(7 * _sin(a))),
+                (250, 205, 80))
+    # wet road dashes along the floor
+    for wx in range(120, w, 52):
+        cv.fill_rect(x + wx, y + 100, 30, 2, (70, 78, 96))
+    # "~1M WITHOUT POWER" tag, top-right, ink box
+    cv.fill_rect(x + w - 128, y + 6, 120, 15, INK)
+    draw_text(cv, x + w - 124, y + 17, "~1M WITHOUT POWER", 9, True,
+              (255, 255, 255))
 
 
 def scene_refinery(cv, x, y, w, h):
@@ -885,7 +955,10 @@ def scene_parade(cv, x, y, w, h):
 
 
 SCENES = {"tariffs": scene_tariffs, "refinery": scene_refinery,
-          "parade": scene_parade}
+          "parade": scene_parade, "storm": scene_storm}
+# NOTE v2.4: scene_refinery is kept (unused since the Ras Tanura lead was
+# demoted to ALSO) — the code keeps prior scenes, like v2.3 kept the
+# v2.2 trading terminal.
 
 
 # v1.2: one consistent stroke weight (SW = 3px) for every spot icon.
@@ -1387,9 +1460,15 @@ CONTINENTS = [
 ]
 
 # (num, lon, lat, label dx, label dy) — label offsets keep Europe readable
+# v2.4: pin 1 is the nor'easter (offshore New England, -66, 41 — the
+# storm centre sat off the coast) and pin 2 is Washington (tariffs);
+# pin 3 stays New York (Macy's), pin 6 New York (Nasdaq). The storm
+# label sits south-east of its dot (+30/+16, over the Atlantic) so the
+# four north-east US labels + London stay >=18px apart (audit v2.4
+# first run: +22/-18 put the storm label 13px from London's).
 PINS = [
-    (1, -77.0, 38.9, -20, -14),
-    (2, 50.2, 26.6, 10, -10),
+    (1, -66.0, 41.0, 30, 16),
+    (2, -77.0, 38.9, -20, -14),
     (3, -74.0, 40.7, -14, 8),
     (4, 31.2, 30.0, 8, 10),
     (5, 30.5, 50.4, 16, -12),
@@ -1511,8 +1590,8 @@ def build():
     y += 63
     # red deck line: the three leads in one line
     draw_text(cv, MX + CW // 2, y + 12,
-              "US proposes tariffs on 14 partners · Houthis claim Ras Tanura "
-              "refinery hit · Macy’s 100th parade postponed",
+              "Nor’easter cuts power to ~1M · US proposes tariffs on 14 "
+              "partners · Macy’s 100th parade postponed",
               13, True, RED, "c")
     y += 15
     cv.hline(MX, y, CW, RULE, 1)
