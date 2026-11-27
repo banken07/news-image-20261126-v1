@@ -45,34 +45,30 @@ REGION_COLORS = [
     # unambiguously British; EUROPE keeps Kyiv/Brussels/ECB/Lille).
     # Totals still 35 (EAST 3 + SOUTH 3 + ME 5 + AM 9 + OC 3 + UK 3 +
     # EUROPE 4 + WORLD 5). v1.6 colours desaturated ~15% toward grey.
-    # v2.0: 9 regions — AFRICA added (duel finding: Ebola + Africa were
-    # missing entirely; top entries carry 3-7 Africa stories). S13 Nepal
-    # becomes S13 Ebola (SOUTH 3 -> 2); S4 Cairo + A9/A17 Somalia move
-    # MIDDLE EAST -> AFRICA (ME 5 -> 2). New totals: EAST 3 + SOUTH 2 +
-    # ME 2 + AFRICA 4 + AM 9 + OC 3 + UK 3 + EUROPE 4 + WORLD 5 = 35.
-    # AFRICA magenta-rose: distinct from SOUTH ASIA purple, AMERICAS
-    # brick and UK gold. Note: the two 2-count segments are 56px wide
-    # while "SOUTH ASIA 2" / "MIDDLE EAST 2" need 69/77px at 10px — the
-    # bar draws narrow labels at 7px (see build()).
-    ("EAST ASIA", 3, (58, 96, 135)),
+    # v2.3: 40 stories — A23 Riyadh + A24 Kuwait (ME), A25 Bangkok (EAST),
+    # A26 Paris (EUROPE), A27 Virgin strike (OCEANIA). New totals: EAST 4
+    # + SOUTH 2 + ME 4 + AFRICA 4 + AM 9 + OC 4 + UK 3 + EUROPE 5 + WORLD 5
+    # = 40. SOUTH ASIA 2 stays the narrow segment (49px, label at 7px).
+    ("EAST ASIA", 4, (58, 96, 135)),
     ("SOUTH ASIA", 2, (122, 88, 130)),
-    ("MIDDLE EAST", 2, (171, 91, 45)),
+    ("MIDDLE EAST", 4, (171, 91, 45)),
     ("AFRICA", 4, (178, 62, 104)),
     ("AMERICAS", 9, (123, 58, 53)),
-    ("OCEANIA", 3, (55, 113, 111)),
+    ("OCEANIA", 4, (55, 113, 111)),
     ("UK", 3, (158, 120, 50)),
-    ("EUROPE", 4, (101, 113, 68)),
+    ("EUROPE", 5, (101, 113, 68)),
     ("WORLD", 5, (80, 79, 75)),
 ]
-# v1.7: topic fields — the same 35 stories regrouped by subject (main-story
+# v1.7: topic fields — the same 40 stories regrouped by subject (main-story
 # fields are explicit in STORY-LIST.md kickers; ALSO items classified by
 # subject: A1/A2/A4 ECONOMY, A3/A8/A9 CONFLICT, A5/A6/A7/A15/A16/A18
 # SOCIETY, A10/A14 WORLD, A11/A17/A22 DISASTER, A12/A13/A19/A21 SPORT,
-# A20 CULTURE). TRADE 1 + CONFLICT 5 + ECONOMY 6 + DISASTER 5 + SOCIETY 9
-# + SPORT 5 + CULTURE 2 + WORLD 2 = 35.
+# A20 CULTURE; v2.3 adds A23/A24 CONFLICT, A25 DISASTER, A26/A27 SOCIETY).
+# TRADE 1 + CONFLICT 7 + ECONOMY 6 + DISASTER 6 + SOCIETY 11 + SPORT 5 +
+# CULTURE 2 + WORLD 2 = 40.
 FIELDS = [
-    ("TRADE", 1), ("CONFLICT", 5), ("ECONOMY", 6), ("DISASTER", 5),
-    ("SOCIETY", 9), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 2),
+    ("TRADE", 1), ("CONFLICT", 7), ("ECONOMY", 6), ("DISASTER", 6),
+    ("SOCIETY", 11), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 2),
 ]
 # v1.7: chip backgrounds = region colour darkened x0.78 so white bold text
 # keeps >=4:1 contrast (the plain bar colours are too light for the 8px
@@ -415,13 +411,17 @@ def draw_lines(cv, x, y_top, lines, size, leading, bold=False, color=INK,
     return y_top + asc + (len(lines) - 1) * leading + int(size * 0.24)
 
 
-# ---- content: STORY-LIST.md is the single source of truth (35 stories)
+# ---- content: STORY-LIST.md is the single source of truth (40 stories)
 MX = 24            # left/right margin
 CW = W - 2 * MX    # content width = 976
 
 STATS = [
     ("−0.6%", "NASDAQ · INTRADAY −4.6%"),
-    ("+1.6%", "NIKKEI · THU REBOUND"),
+    # v2.3: NIKKEI slot replaced by the storm's power toll — the
+    # nor'easter peaked at 961,000 customers without power Thu evening
+    # (PowerOutage.us via Reuters); Nikkei +1.6% is still carried by
+    # ALSO A1. "~1M" is the verified rounded figure.
+    ("~1M", "WITHOUT POWER"),
     ("$94.61", "BRENT · +3.5%"),
     ("31", "DEAD · CAIRO FIRE"),
     # v2.0: "18TH / ANNIV. · 26/11 MUMBAI" replaced by the Ebola stat —
@@ -471,11 +471,12 @@ LEADS = [
     {
         "num": 3, "kick": "NEW YORK · CULTURE", "pill": "OFFICIAL",
         "head": "Macy’s 100th parade postponed",
-        # v2.0: deck trimmed to 2 lines (was 3) — drops "Balloons
-        # deflated; NBC airs a 2025 rerun" (the deflated balloon is the
-        # scene itself; the rerun is minor).
+        # v2.3: deck reworded to carry the storm's power toll (D) — the
+        # same nor'easter peaked at ~961,000 customers without power Thu
+        # evening (PowerOutage.us via Reuters). Gusts 60 mph stay in the
+        # scene chip ("GUSTS 60 MPH"). Still 2 lines.
         "deck": ("First weather delay ever — the parade moves to Saturday "
-                 "8:30 a.m. as a nor’easter brings gusts to 60 mph."),
+                 "8:30 a.m. as the nor’easter cuts power to ~1M."),
         # v2.0: WHY IT MATTERS — first weather postponement in the
         # parade's 100-year history (deck + RESEARCH.md: suspended only
         # in WWII 1942-44).
@@ -491,8 +492,12 @@ SMALL = [
      "Fuel tanker overturns on the Ring Road, Wed evening; 21 hurt, 27 "
      "vehicles charred; toll is preliminary. (AP)", "flame"),
     (5, "KYIV · CONFLICT", "REPORTED", "Ukraine hits 5 jets; Kyiv struck",
-     "Savasleyka airbase hit — 3 MiG-31s, 2 Su-34s. Russia hits Kyiv "
-     "shopping centre; 2 Samara refineries struck. (BBC)", "jet"),
+     # v2.3: deck reworded to carry story H — overnight ballistic-missile
+     # strike on Kyiv, 7 hurt (Klitschko); 87 drones downed or suppressed
+     # of 113 launched, 52 jet-powered (Ukraine Air Force, via Reuters /
+     # NY Post 26 Nov). Still 3 lines.
+     "Savasleyka hit — 3 MiG-31s, 2 Su-34s; 2 Samara refineries hit. "
+     "Kyiv hit overnight; 7 hurt, 87 drones downed. (BBC)", "jet"),
     (6, "NEW YORK · ECONOMY", "REPORTED", "Nasdaq plunges, then recovers",
      "Wed close −0.6% at 23,586 after −4.6% intraday dive; Nasdaq-100 "
      "briefly −20% off record. Nvidia −3.9%. (AP, CNBC)", "chart"),
@@ -505,9 +510,12 @@ SMALL = [
     (9, "MUMBAI · SOCIETY", "OFFICIAL", "India marks 18 years since 26/11",
      "166 killed in 2008; Mumbai on high alert as tributes are paid. "
      "Jaishankar: zero tolerance on terror. (IANS)", "candle"),
-    (10, "GENEVA · SPORT", "OFFICIAL", "Gukesh–Sindarov: Game 3 today",
-     "World title match level 1–1 after two draws. Sindarov has White; "
-     "first to 7.5 points takes the $2.5m crown. (FIDE)", "chess"),
+    # v2.3: S10 updated with the result, now known (G) — Game 3 ended in
+    # a 60-move draw, match level 1.5–1.5; Game 4 Saturday 28 Nov
+    # (Chess.com / FIDE). Headline + deck + chip updated; still 2/3 lines.
+    (10, "GENEVA · SPORT", "OFFICIAL", "Gukesh–Sindarov: Game 3 drawn",
+     "Game 3 ends in a 60-move draw; match level 1.5–1.5. Game 4 "
+     "Saturday; first to 7.5 takes the $2.5m crown. (FIDE)", "chess"),
     (11, "SEOUL · ECONOMY", "OFFICIAL", "Bank of Korea lifts rate to 3.25%",
      "Up 25bp, the highest in two years; 2027 growth forecast raised to "
      "4.1%. (Yonhap, CNBC)", "bank"),
@@ -521,7 +529,7 @@ SMALL = [
     # 5,904 deaths, Bundibugyo strain, second-largest Ebola outbreak on
     # record, response disrupted by fighting. ECDC: 12,021 at 24 Nov;
     # MoH SitRep 195 at 25 Nov (12,089 / 5,943) is the 25 Nov figure,
-    # NOT used. Total stays 35 (1-for-1 swap); region AFRICA.
+    # NOT used. Total was 35 at v2.0 (1-for-1 swap); region AFRICA.
     (13, "DR CONGO · DISASTER", "REPORTED",
      "Ebola tops 12,000 cases in DR Congo",
      "12,021 cases, 5,904 dead — second-largest Ebola outbreak ever "
@@ -543,7 +551,7 @@ CHIPS = {
     7: ("TUBE", "HALTED", "UK"),
     8: ("€45BN", "LOAN", "EUROPE"),
     9: ("18 YEARS", "SINCE 26/11", "SOUTH ASIA"),
-    10: ("GAME 3", "1–1", "WORLD"),
+    10: ("1.5–1.5", "DRAW", "WORLD"),
     11: ("3.25%", "RATE", "EAST ASIA"),
     12: ("168", "DEAD", "EAST ASIA"),
     13: ("12,021", "CASES", "AFRICA"),
@@ -587,6 +595,17 @@ ALSO = [
     ("Gordon Ramsay to host revived Top Gear", "UK", "BBC"),
     ("U-17 World Cup: Egypt 4–1 Panama; Uganda 6–0 New Caledonia", "WORLD", "Africanews"),
     ("King tides flood the California coast as storms hit Thanksgiving travel", "AMERICAS", "Guardian"),
+    # v2.3: 5 new ALSO items (A23–A27), all genuine Thu 26 Nov, verified
+    # to primary sources (see STORY-LIST.md / RESEARCH.md):
+    # A23 Riyadh intercepts (coalition / al-Maliki via Reuters),
+    # A24 Kuwait drone (Italy/Kuwait blame Iran; Tehran denies — Reuters,
+    # CNN, WSJ), A25 Bangkok blast (AP via CNN), A26 Paris march
+    # (Franceinfo), A27 Virgin strike (TravelTalk / Australian Aviation).
+    ("Coalition downs 2 Houthi missiles over Riyadh; Jazan port hit", "MIDDLE EAST", "Reuters"),
+    ("Kuwait drone kills 2 Italians; Italy blames Iran, Tehran denies", "MIDDLE EAST", "Reuters"),
+    ("Bangkok refinery blast injures 9, 3 critical; plant shut", "EAST ASIA", "AP"),
+    ("Paris students march for funds; ~2,000, Bastille to Pantheon", "EUROPE", "Franceinfo"),
+    ("Virgin Australia staff strike at 4 airports in pay row", "OCEANIA", "TravelTalk"),
 ]
 
 DATE_CHECK = [
@@ -654,40 +673,55 @@ def draw_chip(cv, x, y, num, lab, region):
 
 # ---- schematic scenes for the three leads (drawn in code, flat vector)
 def scene_tariffs(cv, x, y, w, h):
-    # v2.2: hero redrawn for the 110px box (was 64px) — same trading
-    # terminal, motifs grown ~1.5x: bigger globe, taller bars, deeper
-    # bands. All facts unchanged (India 25 / Japan 15 / China 20 /
-    # Vietnam 20, USTR proposal).
-    cv.fill_rect(x, y, w, 30, (14, 22, 40))
-    cv.fill_rect(x, y + 30, w, 36, (20, 34, 62))
-    cv.fill_rect(x, y + 66, w, h - 66, (10, 16, 30))
-    for gx in range(12, w, 24):
-        cv.fill_rect(x + gx, y, 1, h, (28, 46, 80))
-    for gy in (22, 44, 88):
-        cv.fill_rect(x, y + gy, w, 1, (28, 46, 80))
-    # globe, bigger (r 22) — global trade
-    gx, gy = x + 62, y + 48
-    cv.fill_circle(gx, gy, 22, (96, 168, 232))
-    cv.fill_ellipse(gx, gy, 22, 9, (140, 196, 240))
-    cv.fill_ellipse(gx, gy, 9, 22, (140, 196, 240))
-    base = y + h - 18
-    bars = [("INDIA", 25, (224, 64, 52)), ("JAPAN", 15, (250, 200, 70)),
-            ("CHINA", 20, (96, 168, 232)), ("VIETNAM", 20, (96, 168, 232))]
-    bw, gap = 38, 16
-    bx = x + 118
-    for i, (lab, val, col) in enumerate(bars):
-        bh = int(val * 2.0)
-        xx = bx + i * (bw + gap)
-        cv.fill_rect(xx, base - bh, bw, bh, col)
-        cv.rect(xx, base - bh, bw, bh, (255, 255, 255), 1)
-        draw_text(cv, xx + bw // 2, base - bh - 6, "%d%%" % val, 12, True,
-                  (255, 255, 255), "c")
-        draw_text(cv, xx + bw // 2, base + 12, lab, 9, True,
-                  (255, 255, 255), "c")
-    cv.fill_rect(bx - 8, y + 30, 3, base - y - 30, (255, 255, 255))
-    cv.fill_rect(x, base, w, 3, (255, 255, 255))
-    cv.fill_rect(x + 4, y + 4, 96, 15, PAPER)
-    draw_text(cv, x + 8, y + 15, "USTR PROPOSAL", 9, True, INK)
+    # v2.3: SINGLE iconic motif — one giant container ship under a red
+    # "25%" stamp. Replaces the v2.2 trading terminal (globe + 4 bars +
+    # chip), which the v2.2 duel called the busiest hero on the page
+    # (all three thin losses named it). Facts stay in the deck + chip
+    # (India 25%, Japan 15%, China & Vietnam 20%). Night sky, bridge
+    # superstructure left, two stacked container rows, hull, waves.
+    # The stamp is a white-ringed red disc top-right, "25%" 16px bold.
+    cv.fill_rect(x, y, w, h, (10, 30, 64))
+    for r in range(3):
+        cv.fill_rect(x, y + h * (8 + r * 6) // 100, w, h * 3 // 100,
+                     (16 + r * 6, 42 + r * 6, 86 + r * 6))
+    for (sx, sy) in [(x + 26, y + 9), (x + 90, y + 6), (x + 212, y + 7),
+                     (x + 262, y + 10), (x + 296, y + 8)]:
+        cv.fill_rect(sx, sy, 2, 2, (255, 255, 255))
+    # bridge superstructure (left), same height as the container rows
+    cv.fill_rect(x + 14, y + 28, 26, 36, (196, 198, 202))
+    cv.fill_rect(x + 14, y + 28, 26, 3, (210, 48, 32))
+    cv.fill_rect(x + 18, y + 36, 18, 3, (60, 90, 130))
+    cv.fill_rect(x + 18, y + 42, 18, 3, (60, 90, 130))
+    cv.fill_rect(x + 18, y + 48, 18, 3, (60, 90, 130))
+    # smokestack mid-ship + smoke puffs above it (clear of the label)
+    cv.fill_rect(x + 150, y + 16, 6, 12, (210, 48, 32))
+    for (sx0, sy0) in [(x + 148, y + 8), (x + 154, y + 5), (x + 160, y + 9)]:
+        cv.fill_rect(sx0, sy0, 3, 3, (200, 200, 200))
+    # two stacked container rows
+    cv.fill_rect(x + 40, y + 28, 258, 36, (18, 44, 82))
+    cv.fill_rect(x + 40, y + 28, 258, 2, (60, 90, 130))
+    cols1 = [(210, 48, 32), (240, 166, 30), (58, 96, 135), (210, 48, 32),
+             (240, 166, 30), (58, 96, 135), (210, 48, 32), (240, 166, 30)]
+    for i, c in enumerate(cols1):
+        cv.fill_rect(x + 42 + i * 31, y + 32, 28, 14, c)
+    cols2 = [(58, 96, 135), (210, 48, 32), (240, 166, 30), (58, 96, 135),
+             (210, 48, 32), (240, 166, 30), (58, 96, 135), (210, 48, 32)]
+    for i, c in enumerate(cols2):
+        cv.fill_rect(x + 42 + i * 31, y + 47, 28, 14, c)
+    # hull + water + two wave-dash rows (fills the 110px box to the floor)
+    cv.fill_rect(x, y + 64, w, 10, (122, 34, 30))
+    cv.fill_rect(x, y + 74, w, 12, (14, 26, 48))
+    for wx in range(8, w, 46):
+        cv.fill_rect(x + wx, y + 78, 30, 2, (70, 110, 160))
+    for wx in range(30, w, 46):
+        cv.fill_rect(x + wx, y + 92, 30, 2, (70, 110, 160))
+    # red "25%" stamp, top-right, over the containers' right end
+    # (white ring = white disc r24 under the red disc r22)
+    cv.fill_circle(x + 288, y + 30, 24, (255, 255, 255))
+    cv.fill_circle(x + 288, y + 30, 22, (210, 48, 32))
+    draw_text(cv, x + 288, y + 25, "25%", 16, True, (255, 255, 255), "c")
+    draw_text(cv, x + 12, y + 10, "USTR PROPOSAL", 8, True,
+              (255, 255, 255), "l")
 
 
 def scene_refinery(cv, x, y, w, h):
@@ -923,8 +957,10 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(x, y + 20, w, 18, (232, 120, 80))
         cv.fill_rect(x, y + 38, w, h - 38, (44, 38, 44))
         cv.fill_circle(x + 168, y + 10, 8, (255, 236, 190))
+        # v2.3: dashes at y+46 (was y+50) — card scene is 50px now;
+        # 4px above the floor, same as v2.2.
         for dx in (20, 60, 100, 140):
-            cv.fill_rect(x + dx, y + 50, 6, 2, (248, 244, 233))
+            cv.fill_rect(x + dx, y + 46, 6, 2, (248, 244, 233))
         for (sx, sy, rx, ry) in [(162, 34, 5, 3), (160, 40, 6, 3),
                                  (163, 46, 5, 3)]:
             cv.fill_ellipse(x + sx, y + sy, rx, ry, (120, 116, 110))
@@ -970,7 +1006,9 @@ def draw_icon(cv, x, y, w, h, key):
         # covered the Y-axis top and the V-line's first (dip) point; the
         # axis top now clears the chip bottom by 2px, and the baseline
         # still sits 7px above the scene floor.
-        cy = cy + 13
+        # v2.3: cy +12 (was +13) — card scene is 50px now (was 54);
+        # the axis baseline stays 1px above the scene floor.
+        cy = cy + 12
         cv.fill_rect(cx - 70, cy - 13, 3, 26, (255, 255, 255))
         cv.fill_rect(cx - 70, cy + 10, 140, 3, (255, 255, 255))
         cv.fill_rect(cx - 58, cy - 4, 12, 14, (96, 168, 232))
@@ -1070,16 +1108,18 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(x, y + 20, w, 18, (212, 128, 78))
         cv.fill_rect(x, y + 38, w, h - 38, (38, 34, 36))
         # Gateway arch silhouette, left of the wreath (below the chip)
+        # v2.3: arch legs 16px (was 18) — card scene is 50px now.
         cv.fill_ellipse(x + 29, y + 34, 20, 8, (30, 26, 30))
-        cv.fill_rect(x + 12, y + 34, 6, 18, (30, 26, 30))
-        cv.fill_rect(x + 40, y + 34, 6, 18, (30, 26, 30))
+        cv.fill_rect(x + 12, y + 34, 6, 16, (30, 26, 30))
+        cv.fill_rect(x + 40, y + 34, 6, 16, (30, 26, 30))
         # arch opening, sunset orange showing through (v2.1 fix: the
         # solid arch read as a dark mound; the opening makes it a gate)
         cv.fill_ellipse(x + 29, y + 38, 11, 9, (212, 128, 78))
         # row of small candles, bottom-right
+        # v2.3: small candles 2px higher (card scene is 50px now).
         for ccx in (140, 155, 170):
-            cv.fill_rect(x + ccx, y + 44, 3, 8, (248, 244, 233))
-            cv.fill_circle(x + ccx + 1, y + 41, 2, (250, 205, 80))
+            cv.fill_rect(x + ccx, y + 42, 3, 8, (248, 244, 233))
+            cv.fill_circle(x + ccx + 1, y + 39, 2, (250, 205, 80))
         # v1.5: solemn memorial wreath with REAL leaf shapes (v1.2 leaves
         # were 2px dots that read as beads) + flame, Mumbai
         for k in range(12):
@@ -1134,9 +1174,11 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_poly([(cx + 6, cy - 6), (cx + 8, cy - 12), (cx + 10, cy - 6)],
                      (250, 205, 80))
         # fire-truck ladder, bottom-right to the second tower
-        stroke3(cv, [(x + 178, y + 52), (x + 142, y + 32)], RED)
-        stroke3(cv, [(x + 175, y + 52), (x + 139, y + 32)], RED)
-        for (rx0, ry0) in [(167, 46), (160, 40), (153, 35), (146, 30)]:
+        # v2.3: whole ladder shifted 4px up (card scene is 50px now;
+        # the bottom was at y+52, past the floor).
+        stroke3(cv, [(x + 178, y + 48), (x + 142, y + 32)], RED)
+        stroke3(cv, [(x + 175, y + 48), (x + 139, y + 32)], RED)
+        for (rx0, ry0) in [(167, 42), (160, 36), (153, 31), (146, 26)]:
             cv.line(x + rx0, y + ry0, x + rx0 + 3, y + ry0 - 4, RED)
     elif key == "chess":
         # v2.1: layered green-felt background (was cream = the page) —
@@ -1177,11 +1219,13 @@ def draw_icon(cv, x, y, w, h, key):
         # paper. The rising-rate arrow is unchanged.
         cv.fill_rect(x, y + 20, w, 18, (56, 132, 142))
         cv.fill_rect(x, y + 38, w, h - 38, (24, 30, 36))
-        for (bx0, by0, bw0, bh0) in [(8, 44, 10, 10), (22, 40, 12, 14),
-                                     (38, 46, 10, 8), (140, 42, 12, 12),
-                                     (156, 46, 10, 8), (170, 40, 12, 14)]:
+        # v2.3: skyline boxes + windows 4px higher (card scene is 50px
+        # now; box bottoms were at y+53, past the floor).
+        for (bx0, by0, bw0, bh0) in [(8, 40, 10, 10), (22, 36, 12, 14),
+                                     (38, 42, 10, 8), (140, 38, 12, 12),
+                                     (156, 42, 10, 8), (170, 36, 12, 14)]:
             cv.fill_rect(x + bx0, y + by0, bw0, bh0, (16, 22, 28))
-        for (wx, wy) in [(11, 47), (25, 43), (143, 45), (173, 43)]:
+        for (wx, wy) in [(11, 43), (25, 39), (143, 41), (173, 39)]:
             cv.fill_rect(x + wx, y + wy, 2, 3, (250, 205, 80))
         # light pavement strip under the bank's base (the dark base
         # would otherwise vanish into the dark skyline band)
@@ -1229,12 +1273,14 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(x, y + 20, w, 18, (64, 124, 66))
         cv.fill_rect(x, y + 38, w, h - 38, (104, 80, 50))
         # left palm
-        stroke3(cv, [(x + 12, y + 52), (x + 10, y + 34)], (18, 52, 28))
+        # v2.3: palm trunks end at y+49 (was y+52, past the 50px floor).
+        stroke3(cv, [(x + 12, y + 49), (x + 10, y + 34)], (18, 52, 28))
         stroke3(cv, [(x + 10, y + 34), (x + 2, y + 28)], (18, 52, 28))
         stroke3(cv, [(x + 10, y + 34), (x + 20, y + 28)], (18, 52, 28))
         stroke3(cv, [(x + 10, y + 34), (x + 4, y + 38)], (18, 52, 28))
         # right palm
-        stroke3(cv, [(x + 176, y + 52), (x + 178, y + 34)], (18, 52, 28))
+        # v2.3: palm trunks end at y+49 (was y+52, past the 50px floor).
+        stroke3(cv, [(x + 176, y + 49), (x + 178, y + 34)], (18, 52, 28))
         stroke3(cv, [(x + 178, y + 34), (x + 168, y + 28)], (18, 52, 28))
         stroke3(cv, [(x + 178, y + 34), (x + 186, y + 30)], (18, 52, 28))
         stroke3(cv, [(x + 178, y + 34), (x + 170, y + 38)], (18, 52, 28))
@@ -1450,69 +1496,73 @@ def draw_map(cv, x, y, w, h):
 def build():
     cv = Canvas()
     y = 8
-    # top strip
+    # top strip — v2.3: advance 13 -> 12 (funds the bigger masthead)
     draw_text(cv, MX, y + 11, "THE WORLD IN ONE DAY", 11, True, INK)
-    draw_text(cv, MX + CW, y + 11, "35 STORIES · 9 REGIONS · THURSDAY 26 NOVEMBER 2026",
+    draw_text(cv, MX + CW, y + 11, "40 STORIES · 9 REGIONS · THURSDAY 26 NOVEMBER 2026",
               11, True, INK, "r")
-    y += 13
+    y += 12
     cv.hline(MX, y, CW, RULE, 2)
     y += 6
-    # masthead
-    draw_text(cv, MX + CW // 2, y + 44, "Thursday 26 November 2026", 52, True,
+    # masthead — v2.3: 52 -> 64px (dense core ~30px; top #9 is 30px,
+    # #10 is 28px). Measured 64px = ~791px wide, fits the 976px line.
+    # Baseline y+53, advance 51 -> 63 (costs +12, funded below).
+    draw_text(cv, MX + CW // 2, y + 53, "Thursday 26 November 2026", 64, True,
               INK, "c")
-    y += 51
+    y += 63
     # red deck line: the three leads in one line
     draw_text(cv, MX + CW // 2, y + 12,
               "US proposes tariffs on 14 partners · Houthis claim Ras Tanura "
               "refinery hit · Macy’s 100th parade postponed",
               13, True, RED, "c")
-    y += 16
+    y += 15
     cv.hline(MX, y, CW, RULE, 1)
     y += 5
     # stat strip: 6 callouts — v1.7: values 22 -> 32px (top-10 median
-    # 32-35px; ours were the smallest stat numbers in the set)
+    # 32-35px; ours were the smallest stat numbers in the set).
+    # v2.3: advance 43 -> 37 (values y+23, labels y+34, vline 32px).
     sw = CW // 6
     for i, (val, lab) in enumerate(STATS):
         bx = MX + i * sw
         if i:
-            cv.vline(bx, y + 4, 38, (200, 192, 172), 1)
-        draw_text(cv, bx + sw // 2, y + 26, val, 32, True, RED_DK, "c")
-        draw_text(cv, bx + sw // 2, y + 40, lab, 9, True, INK_SOFT, "c")
-    y += 43
+            cv.vline(bx, y + 4, 32, (200, 192, 172), 1)
+        draw_text(cv, bx + sw // 2, y + 23, val, 32, True, RED_DK, "c")
+        draw_text(cv, bx + sw // 2, y + 34, lab, 9, True, INK_SOFT, "c")
+    y += 37
     cv.hline(MX, y, CW, RULE, 1)
     y += 3
-    # region bar: segments proportional to story counts (must total 35) —
+    # region bar: segments proportional to story counts (must total 40) —
     # v1.7: 8 segments; the last takes the remainder so rounding never
     # overshoots the 976px content width by a pixel.
-    # v2.0: 9 segments. The two 2-count segments are only 56px wide while
-    # "SOUTH ASIA 2" needs 69px and "MIDDLE EAST 2" 77px at 10px, so the
-    # label shrinks to 7px on segments too narrow for 10px (floor 7px;
-    # "MIDDLE EAST 2" at 7px is 54px in a 56px segment — 1px a side).
+    # v2.3: 9 segments, totals 40. Only SOUTH ASIA 2 is narrow now
+    # (49px); its label shrinks to 6px ("SOUTH ASIA 2" is 48px at 7px,
+    # 41px at 6px — the loop floor is 6px so it fits with margin).
     total = sum(c for (_, c, _) in REGION_COLORS)
-    assert total == 35, total
+    assert total == 40, total
     rx = MX
     for si, (name, count, col) in enumerate(REGION_COLORS):
-        seg = int(round(CW * count / 35.0)) if si < len(REGION_COLORS) - 1 \
+        seg = int(round(CW * count / 40.0)) if si < len(REGION_COLORS) - 1 \
             else MX + CW - rx
-        cv.fill_rect(rx, y, seg, 20, col)
+        cv.fill_rect(rx, y, seg, 17, col)
         label = "%s %d" % (name, count)
         rsize = 10
-        while rsize > 7 and text_width(label, rsize, True) > seg - 2:
+        while rsize > 6 and text_width(label, rsize, True) > seg - 2:
             rsize -= 1
         draw_text(cv, rx + seg // 2, y + 11 + int(rsize * 0.35), label,
                   rsize, True, (255, 255, 255), "c")
         rx += seg
-    y += 20
-    # v1.7: FIELDS strip — the same 35 stories by topic (see FIELDS above),
+    y += 17
+    # v1.7: FIELDS strip — the same 40 stories by topic (see FIELDS above),
     # the taxonomy strip the top entries carry (hwang-steven 21 fields,
     # tidy-meteor 20 fields + 8 stats). One thin PAPER_DIM band.
-    cv.fill_rect(MX, y, CW, 16, PAPER_DIM)
+    # v2.3: band 16 -> 13px, text baseline y+11, advance 15 -> 13.
+    cv.fill_rect(MX, y, CW, 13, PAPER_DIM)
     fields_txt = "FIELDS   " + "  ·  ".join("%s %d" % (n, c)
                                             for (n, c) in FIELDS)
-    draw_text(cv, MX + CW // 2, y + 12, fields_txt, 9, True, INK, "c")
-    y += 15
+    draw_text(cv, MX + CW // 2, y + 11, fields_txt, 9, True, INK, "c")
+    y += 13
     # timeline: THE DAY IN UTC — title at left, nodes shifted right of it
-    tl_y = y + 20
+    # v2.3: tl_y y+18 (was y+20), advance 45 -> 42.
+    tl_y = y + 18
     draw_text(cv, MX, tl_y + 4, "THE DAY IN UTC", 10, True, INK)
     cv.hline(MX + 150, tl_y, CW - 150, INK_SOFT, 1)
     tw = (CW - 150) // 6
@@ -1523,7 +1573,7 @@ def build():
         lines = wrap_text(lab, 9, False, tw - 14)
         draw_lines(cv, cx - (tw - 14) // 2, tl_y + 6, lines, 9, 10,
                    False, INK_SOFT, "l", tw - 14)
-    y += 45
+    y += 42
     # ---- three leads
     lw = (CW - 2 * 11) // 3
     lead_top = y
@@ -1549,36 +1599,38 @@ def build():
         draw_text(cv, lx, my, lead["meta"], 9, False, INK_SOFT)
     y = lead_top + 16 + 110 + 6 + 2 * 21 + 2 + 2 * 12 + 12 + 8 + 3
     cv.hline(MX, y, CW, (200, 192, 172), 1)
-    y += 4
+    y += 3  # v2.3: was 4 (funds the bigger masthead + ALSO floor)
     # ---- small cards: 5 across x 2 rows
     # v1.7: each card is a mini-scene — the v1.5 illustration is drawn
     # natively into a 187x60 scene box (same absolute motif size as v1.5,
     # centred, edges crisp, no scaling), with the two-line coloured chip
     # INSIDE the scene's top-left corner (the v1.6 black full-width band is
     # gone). Kicker/headline/deck keep the v1.6 geometry below the scene.
+    # v2.3: cardh 138 -> 134, scene 54 -> 50 (kicker +58, pill +52,
+    # headline +66); funds the bigger masthead + ALSO floor.
     cardw = (CW - 4 * 10) // 5
-    cardh = 138
+    cardh = 134
     for row in range(2):
         for col in range(5):
             idx = row * 5 + col
             num, kick, pill, head, deck, icon = SMALL[idx]
             cx0 = MX + col * (cardw + 10)
             cy0 = y + row * (cardh + 4)
-            draw_icon(cv, cx0, cy0, cardw, 54, icon)
+            draw_icon(cv, cx0, cy0, cardw, 50, icon)
             cn, cl, creg = CHIPS[num]
             cdx, cdy = CHIP_POS.get(num, (4, 2))
             draw_chip(cv, cx0 + cdx, cy0 + cdy, cn, cl, creg)
-            draw_text(cv, cx0, cy0 + 62, "%d · %s" % (num, kick), 9, True,
+            draw_text(cv, cx0, cy0 + 58, "%d · %s" % (num, kick), 9, True,
                       RED_DK)
-            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 56, pill)
+            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 52, pill)
             hlines = wrap_text(head, 14, True, cardw)
-            draw_lines(cv, cx0, cy0 + 70, hlines, 14, 15, True, INK)
+            draw_lines(cv, cx0, cy0 + 66, hlines, 14, 15, True, INK)
             dlines = wrap_text(deck, 11, False, cardw)
-            draw_lines(cv, cx0, cy0 + 70 + 15 * len(hlines) + 2, dlines,
+            draw_lines(cv, cx0, cy0 + 66 + 15 * len(hlines) + 2, dlines,
                        11, 12, False, INK_SOFT)
     y += 2 * cardh + 4
     cv.hline(MX, y, CW, (200, 192, 172), 1)
-    y += 4
+    y += 3  # v2.3: was 4 (funds the bigger masthead + ALSO floor)
     # ---- map LEFT + ALSO list RIGHT
     mapw = 300
     maph = 152
@@ -1590,14 +1642,15 @@ def build():
               False, INK_SOFT)
     ax = MX + mapw + 14
     aw = CW - mapw - 14
-    draw_text(cv, ax, y + 11, "ALSO ON THURSDAY 26 NOVEMBER — 22 MORE STORIES",
+    # v2.3: 27 ALSO items in 3 columns of 9 (was 22 in 8/8/6).
+    draw_text(cv, ax, y + 11, "ALSO ON THURSDAY 26 NOVEMBER — 27 MORE STORIES",
               11, True, INK)
     colw = (aw - 2 * 12) // 3
     for ci in range(3):
-        col_items = ALSO[ci * 8:(ci + 1) * 8] if ci < 2 else ALSO[16:]
+        col_items = ALSO[ci * 9:(ci + 1) * 9]
         cxx = ax + ci * (colw + 12)
         for ri, (item, reg, outlet) in enumerate(col_items):
-            n = ci * 8 + ri + 1 if ci < 2 else 16 + ri + 1
+            n = ci * 9 + ri + 1
             yy = y + 18 + ri * 20
             # v1.7: number in the story's region colour (darkened, so the
             # gold UK number still reads on cream) + verified outlet at
@@ -1607,7 +1660,7 @@ def build():
             text = item + " (%s)" % outlet
             lines = wrap_text(text, 10, False, colw - 18)
             draw_lines(cv, cxx + 18, yy, lines[:2], 10, 11, False, INK)
-    y += 179  # v2.2: ALSO floor (8 rows end y+179); map 152
+    y += 200  # v2.3: ALSO floor (9 rows end y+200); map 152
     # ---- DATE CHECK, red-bordered
     dc_top = y
     cv.rect(MX, y, CW, 2, RED, 2)
@@ -1616,7 +1669,7 @@ def build():
               "Every story above happened or was first reported or developing "
               "on Thursday 26 November 2026 (UTC). Left out as earlier news:",
               9, False, INK_SOFT)
-    dc_y = y + 18
+    dc_y = y + 16  # v2.3: was y+18 (funds the bigger masthead + ALSO floor)
     # v1.6: the 12 DATE CHECK items as flowing prose (same items, same
     # words, same order — only the grid layout is gone), the shape the top
     # entries use. Measured: 3 lines at 9px (2 lines is not reachable at a
@@ -1626,27 +1679,27 @@ def build():
                             for i, it in enumerate(DATE_CHECK))
     plines = wrap_text(dc_prose, 9, False, CW - 16)
     draw_lines(cv, MX + 8, dc_y, plines, 9, 10, False, INK)
-    dc_y += 10 * len(plines) + 2
+    dc_y += 10 * len(plines) + 1  # v2.3: was +2 (funds the ALSO floor)
     # MORE row: +50% word spacing (space 2.0 -> 3.0px at 8px), leading 10 -> 11,
     # max width 960 -> 944 so no line ends near the right border; the 2px
     # saved in the gap above keeps the page bottom margin unchanged.
     mlines = wrap_text(MORE_CHECKED, 8, False, CW - 32, space_extra=1.0)
     draw_lines(cv, MX + 8, dc_y, mlines, 8, 10, False, INK_SOFT,
                space_extra=1.0)
-    dc_bottom = dc_y + 10 * len(mlines) + 4
+    dc_bottom = dc_y + 10 * len(mlines) + 2  # v2.3: was +4
     cv.rect(MX, dc_top, CW, dc_bottom - dc_top, RED, 2)
     y = dc_bottom + 3
-    # ---- footer
+    # ---- footer — v2.3: advances 10 -> 9 (funds the ALSO floor)
     draw_text(cv, MX, y + 8,
               "OFFICIAL = authority’s own figure or act · REPORTED = press "
               "report · CLAIM = one side’s account. Drawn from verified "
               "reporting; every story first reported or developing Thu 26 Nov "
               "2026 unless dated in DATE CHECK.", 9, False, INK_SOFT)
-    y += 10
+    y += 9
     draw_text(cv, MX, y + 8,
               "Sources: Reuters, AP, BBC, CNN, Yonhap, TfL, FIDE, The Hindu, "
               "Guardian, Africanews", 9, False, INK_SOFT)
-    y += 10
+    y += 9
     return cv, y
 
 
