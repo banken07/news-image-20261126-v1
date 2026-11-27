@@ -39,25 +39,50 @@ GOLD = (176, 132, 40)
 SLATE = (52, 58, 66)
 
 REGION_COLORS = [
-    # v1.6: desaturated ~15% toward grey (the region bar was the most
-    # saturated band on the page after the L3 balloon)
-    ("ASIA-PACIFIC", 6, (58, 96, 135)),
+    # v1.7: 8 regions — ASIA-PACIFIC split EAST/SOUTH (3+3, verified by
+    # city: Seoul/Hong Kong/Shanghai = East; Mumbai/Kathmandu/India =
+    # South) and the UK split out of EUROPE (London/Liverpool/Top Gear are
+    # unambiguously British; EUROPE keeps Kyiv/Brussels/ECB/Lille).
+    # Totals still 35 (EAST 3 + SOUTH 3 + ME 5 + AM 9 + OC 3 + UK 3 +
+    # EUROPE 4 + WORLD 5). v1.6 colours desaturated ~15% toward grey.
+    ("EAST ASIA", 3, (58, 96, 135)),
+    ("SOUTH ASIA", 3, (122, 88, 130)),
     ("MIDDLE EAST", 5, (171, 91, 45)),
     ("AMERICAS", 9, (123, 58, 53)),
     ("OCEANIA", 3, (55, 113, 111)),
-    ("EUROPE", 7, (101, 113, 68)),
+    ("UK", 3, (158, 120, 50)),
+    ("EUROPE", 4, (101, 113, 68)),
     ("WORLD", 5, (80, 79, 75)),
 ]
+# v1.7: topic fields — the same 35 stories regrouped by subject (main-story
+# fields are explicit in STORY-LIST.md kickers; ALSO items classified by
+# subject: A1/A2/A4 ECONOMY, A3/A8/A9 CONFLICT, A5/A6/A7/A15/A16/A18
+# SOCIETY, A10/A14 WORLD, A11/A17/A22 DISASTER, A12/A13/A19/A21 SPORT,
+# A20 CULTURE). TRADE 1 + CONFLICT 5 + ECONOMY 6 + DISASTER 5 + SOCIETY 9
+# + SPORT 5 + CULTURE 2 + WORLD 2 = 35.
+FIELDS = [
+    ("TRADE", 1), ("CONFLICT", 5), ("ECONOMY", 6), ("DISASTER", 5),
+    ("SOCIETY", 9), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 2),
+]
+# v1.7: chip backgrounds = region colour darkened x0.78 so white bold text
+# keeps >=4:1 contrast (the plain bar colours are too light for the 8px
+# chip label, esp. UK gold). ALSO numbers use these too.
+CHIP_COLORS = {name: tuple(int(c * 0.78) for c in col)
+               for (name, _, col) in REGION_COLORS}
 # v1.6: balloon red, desaturated (was the largest saturated red block)
 BALLOON_RED = (158, 46, 42)
 BALLOON_DK = (128, 40, 36)
 # v1.6: dark dot-matrix map — sea dark, land as region-coloured dots
+# v1.7: two new dot colours for the split regions (SOUTH ASIA purple,
+# UK gold); Asia dots split at lon 100, Europe dots at lon 0 (see draw_map)
 MAP_SEA = (36, 40, 48)
 MAP_DOTS = {
     "AMERICAS": (198, 110, 96),
     "WORLD": (168, 162, 150),
     "EUROPE": (158, 172, 104),
-    "ASIA-PACIFIC": (112, 158, 208),
+    "EAST ASIA": (112, 158, 208),
+    "SOUTH ASIA": (158, 124, 166),
+    "UK": (200, 160, 90),
     "OCEANIA": (96, 178, 172),
 }
 
@@ -464,44 +489,52 @@ SMALL = [
      "families to come forward. (The Hindu)", "flood"),
 ]
 
-# v1.6: full-width data chips opening every card — each chip is a fact
-# already in that card's deck/headline (STORY-LIST.md / RESEARCH.md)
+# v1.7: two-line coloured chips INSIDE each card's scene — (number, label,
+# region). Number ~12px bold, label 8px bold; both facts already in that
+# card's deck/headline (STORY-LIST.md). Chip colour = the story's region
+# (darkened, see CHIP_COLORS); the v1.6 black full-width band is gone.
+# Regions: S4 ME, S5 EUROPE, S6 AMERICAS, S7 UK, S8 EUROPE, S9 SOUTH ASIA,
+# S10 WORLD, S11 EAST ASIA, S12 EAST ASIA, S13 SOUTH ASIA.
 CHIPS = {
-    4: "31 DEAD",
-    5: "5 JETS DOWNED",
-    6: "−4.6% THEN RECOVERED",
-    7: "TUBE HALTED",
-    8: "€45BN LOAN",
-    9: "18 YEARS SINCE 26/11",
-    10: "GAME 3 · 1–1",
-    11: "3.25% RATE",
-    12: "168 DEAD",
-    13: "213 PRESUMED DEAD",
+    4: ("31", "DEAD", "MIDDLE EAST"),
+    5: ("5", "JETS DOWNED", "EUROPE"),
+    6: ("−4.6%", "THEN RECOVERED", "AMERICAS"),
+    7: ("TUBE", "HALTED", "UK"),
+    8: ("€45BN", "LOAN", "EUROPE"),
+    9: ("18 YEARS", "SINCE 26/11", "SOUTH ASIA"),
+    10: ("GAME 3", "1–1", "WORLD"),
+    11: ("3.25%", "RATE", "EAST ASIA"),
+    12: ("168", "DEAD", "EAST ASIA"),
+    13: ("213", "PRESUMED DEAD", "SOUTH ASIA"),
 }
 
+# v1.7: (text, region, outlet) — region from the STORY-LIST.md tag
+# (EU bucket split UK/EUROPE as in REGION_COLORS: Liverpool + Top Gear are
+# British, Lille/Bayern + ECB stay EUROPE); outlet = first-listed source
+# for that item in RESEARCH.md (all 22 verified there).
 ALSO = [
-    "Asia rebounds: Nikkei +1.6% as tariffs look milder; Shanghai −2.1%",
-    "Brent $94.61 (+3.5%); WTI $83.68 (+2%) as Gulf fears lift oil",
-    "Trump, Rutte urge Russia not to widen the war (Mar-a-Lago talks)",
-    "ECB: Pablo Hernandez de Cos set to succeed Lagarde",
-    "Abrego Garcia reaches Spain after a 20-month US legal fight",
-    "Brazil withdraws ambassador to Argentina for good",
-    "Hasina return dispute: India separates return from extradition",
-    "ISIL suicide attack kills 2 in Hasakah, Syria",
-    "Somalia: foreign troops withdraw; Uganda steps up anti-al-Shabaab fight",
-    "Australia projected to miss its 2035 emissions target",
-    "Flinders Island fire destroys at least 6 homes",
-    "Liverpool beat Club Brugge 3–0 in the Champions League",
-    "Lille beat Bayern 2–1, ending their unbeaten run",
-    "Rare lakes found beneath the Red Sea",
-    "Canadian astronaut welcomes a baby girl from orbit",
-    "Pig-kidney patient marks one year off dialysis",
-    "Famine risk falls in Baidoa, Somalia — but hunger persists",
-    "US Army calls Iowa 5-ton blast a 'huge success'",
-    "Kurtley Beale returns to the Wallabies after five years",
-    "Gordon Ramsay to host revived Top Gear",
-    "U-17 World Cup: Egypt 4–1 Panama; Uganda 6–0 New Caledonia",
-    "King tides flood the California coast as storms hit Thanksgiving travel",
+    ("Asia rebounds: Nikkei +1.6% as tariffs look milder; Shanghai −2.1%", "EAST ASIA", "CNBC"),
+    ("Brent $94.61 (+3.5%); WTI $83.68 (+2%) as Gulf fears lift oil", "WORLD", "Reuters"),
+    ("Trump, Rutte urge Russia not to widen the war (Mar-a-Lago talks)", "AMERICAS", "Reuters"),
+    ("ECB: Pablo Hernandez de Cos set to succeed Lagarde", "EUROPE", "Rapporteur"),
+    ("Abrego Garcia reaches Spain after a 20-month US legal fight", "AMERICAS", "Euronews"),
+    ("Brazil withdraws ambassador to Argentina for good", "AMERICAS", "MercoPress"),
+    ("Hasina return dispute: India separates return from extradition", "SOUTH ASIA", "The Hindu"),
+    ("ISIL suicide attack kills 2 in Hasakah, Syria", "MIDDLE EAST", "Al Jazeera"),
+    ("Somalia: foreign troops withdraw; Uganda steps up anti-al-Shabaab fight", "MIDDLE EAST", "BBC"),
+    ("Australia projected to miss its 2035 emissions target", "OCEANIA", "Guardian"),
+    ("Flinders Island fire destroys at least 6 homes", "OCEANIA", "Guardian"),
+    ("Liverpool beat Club Brugge 3–0 in the Champions League", "UK", "BBC"),
+    ("Lille beat Bayern 2–1, ending their unbeaten run", "EUROPE", "BBC"),
+    ("Rare lakes found beneath the Red Sea", "WORLD", "ScienceDaily"),
+    ("Canadian astronaut welcomes a baby girl from orbit", "WORLD", "BBC"),
+    ("Pig-kidney patient marks one year off dialysis", "AMERICAS", "CBC"),
+    ("Famine risk falls in Baidoa, Somalia — but hunger persists", "MIDDLE EAST", "AllAfrica"),
+    ("US Army calls Iowa 5-ton blast a 'huge success'", "AMERICAS", "BBC"),
+    ("Kurtley Beale returns to the Wallabies after five years", "OCEANIA", "ABC"),
+    ("Gordon Ramsay to host revived Top Gear", "UK", "BBC"),
+    ("U-17 World Cup: Egypt 4–1 Panama; Uganda 6–0 New Caledonia", "WORLD", "Africanews"),
+    ("King tides flood the California coast as storms hit Thanksgiving travel", "AMERICAS", "Guardian"),
 ]
 
 DATE_CHECK = [
@@ -549,6 +582,20 @@ def draw_pill(cv, x, y, label, size=8):
     cv.fill_rect(x, y, w, 13, bg)
     cv.rect(x, y, w, 13, fg, 1)
     draw_text(cv, x + 5, y + 10, label, size, True, fg)
+    return w
+
+
+def draw_chip(cv, x, y, num, lab, region):
+    """v1.7 two-line coloured chip inside a scene: number 12px bold over
+    label 8px bold, white on the story's darkened region colour, 1px paper
+    border. 21px tall. Returns the chip width."""
+    col = CHIP_COLORS[region]
+    w = max(int(text_width(num, 12, True)),
+            int(text_width(lab, 8, True))) + 10
+    cv.fill_rect(x, y, w, 21, col)
+    cv.rect(x, y, w, 21, PAPER, 1)
+    draw_text(cv, x + 5, y + 11, num, 12, True, (255, 255, 255))
+    draw_text(cv, x + 5, y + 19, lab, 8, True, (255, 255, 255))
     return w
 
 
@@ -648,9 +695,9 @@ def scene_parade(cv, x, y, w, h):
     for rx in range(14, w, 26):
         for ry in range(6, 52, 14):
             cv.line(x + rx, y + ry, x + rx - 9, y + ry + 6, (200, 206, 214))
-    # wind streaks
-    for (sx, sy, ln) in [(130, 12, 60), (230, 22, 60), (30, 46, 50)]:
-        cv.fill_rect(x + sx, y + sy, ln, 2, (220, 226, 232))
+    # wind streaks — v1.7: thicker (2 -> 3px) and longer, the wind reads
+    for (sx, sy, ln) in [(120, 12, 80), (220, 22, 80), (30, 46, 70)]:
+        cv.fill_rect(x + sx, y + sy, ln, 3, (220, 226, 232))
     # Manhattan skyline, low background only (not the main motif)
     heights = [16, 24, 18, 28, 14, 22, 26, 18, 20, 14]
     bx = x + 8
@@ -664,7 +711,9 @@ def scene_parade(cv, x, y, w, h):
     # flat (48x20) it read as a leaf/disc, not a balloon.
     # v1.6: shrunk (rx 30, ry 20) and desaturated — it was the largest
     # saturated red block in the hero and read as decoration, not data
-    bcx, bcy = x + 170, y + 30
+    # v1.7: centre moved right (170 -> 185) so the new red label bar at the
+    # left does not cut into the balloon's lower-left edge
+    bcx, bcy = x + 185, y + 30
     t = 0.28
     ct, st = _cos(t), _sin(t)
     pts = []
@@ -706,10 +755,17 @@ def scene_parade(cv, x, y, w, h):
     # a big "100TH" badge + "SAT 08:30" on the sky, and a "GUSTS 60 MPH"
     # chip top-right (both facts already in this lead's deck)
     draw_text(cv, x + 8, y + 28, "100TH", 22, True, (255, 255, 255))
-    draw_text(cv, x + 8, y + 43, "SAT 08:30", 10, True, (255, 255, 255))
     cv.fill_rect(x + w - 96, y + 4, 92, 15, INK)
     draw_text(cv, x + w - 92, y + 15, "GUSTS 60 MPH", 9, True,
               (255, 255, 255))
+    # v1.7: red in-scene label bar (tidy-meteor's "RAS TANURA HIT" trick) —
+    # the postponement + the new time in one bar; "SAT 08:30" moves here
+    # from its old spot (same words, same facts). Drawn after the ropes so
+    # it sits cleanly on top; the balloon's left edge is behind it.
+    bar_txt = "PARADE POSTPONED — SAT 08:30"
+    bw = int(text_width(bar_txt, 9, True)) + 12
+    cv.fill_rect(x + 8, y + 32, bw, 14, RED)
+    draw_text(cv, x + 14, y + 43, bar_txt, 9, True, (255, 255, 255))
 
 
 SCENES = {"tariffs": scene_tariffs, "refinery": scene_refinery,
@@ -1034,9 +1090,15 @@ def draw_map(cv, x, y, w, h):
         return (px, py)
 
     # continent -> region colour (North+South America = AMERICAS, Africa =
-    # WORLD, Europe = EUROPE, Asia = ASIA-PACIFIC, Australia = OCEANIA)
-    map_regions = ["AMERICAS", "AMERICAS", "WORLD", "EUROPE",
-                   "ASIA-PACIFIC", "OCEANIA"]
+    # WORLD, Europe = UK west of lon 0 / EUROPE east of it, Asia = SOUTH
+    # ASIA west of lon 100 / EAST ASIA east of it, Australia = OCEANIA).
+    # The lon splits are schematic (a dot map, not a survey): the pins
+    # themselves are placed by exact lon/lat and fall on the right side —
+    # Mumbai/Kathmandu west, Seoul/Hong Kong east; London west, Kyiv/
+    # Brussels east. Ireland/Iberia dots read UK-gold and Central/West
+    # Asia dots read South-Asia purple — accepted schematic roughness.
+    map_regions = ["AMERICAS", "AMERICAS", "WORLD", "EUROPE", "ASIA",
+                   "OCEANIA"]
     polys = [[proj(lon, lat) for (lon, lat) in cont] for cont in CONTINENTS]
 
     def inside(px, py, poly):
@@ -1055,7 +1117,14 @@ def draw_map(cv, x, y, w, h):
         for gx in range(x + 3, x + w - 2, 6):
             for ci, poly in enumerate(polys):
                 if inside(gx, gy, poly):
-                    cv.fill_circle(gx, gy, 2, MAP_DOTS[map_regions[ci]])
+                    reg = map_regions[ci]
+                    if ci == 3:  # Europe: UK / EUROPE split at lon 0
+                        lon = (gx - x) / float(w) * 358.0 - 168.0
+                        reg = "UK" if lon < 0 else "EUROPE"
+                    elif ci == 4:  # Asia: SOUTH / EAST split at lon 100
+                        lon = (gx - x) / float(w) * 358.0 - 168.0
+                        reg = "SOUTH ASIA" if lon < 100 else "EAST ASIA"
+                    cv.fill_circle(gx, gy, 2, MAP_DOTS[reg])
                     break
     for (num, lon, lat, dx, dy) in PINS:
         px, py = proj(lon, lat)
@@ -1075,15 +1144,15 @@ def build():
     y = 8
     # top strip
     draw_text(cv, MX, y + 11, "THE WORLD IN ONE DAY", 11, True, INK)
-    draw_text(cv, MX + CW, y + 11, "35 STORIES · 6 REGIONS · THURSDAY 26 NOVEMBER 2026",
+    draw_text(cv, MX + CW, y + 11, "35 STORIES · 8 REGIONS · THURSDAY 26 NOVEMBER 2026",
               11, True, INK, "r")
-    y += 14
+    y += 13
     cv.hline(MX, y, CW, RULE, 2)
     y += 6
     # masthead
     draw_text(cv, MX + CW // 2, y + 44, "Thursday 26 November 2026", 52, True,
               INK, "c")
-    y += 54
+    y += 51
     # red deck line: the three leads in one line
     draw_text(cv, MX + CW // 2, y + 12,
               "US proposes tariffs on 14 partners · Houthis claim Ras Tanura "
@@ -1092,28 +1161,40 @@ def build():
     y += 16
     cv.hline(MX, y, CW, RULE, 1)
     y += 5
-    # stat strip: 6 callouts
+    # stat strip: 6 callouts — v1.7: values 22 -> 32px (top-10 median
+    # 32-35px; ours were the smallest stat numbers in the set)
     sw = CW // 6
     for i, (val, lab) in enumerate(STATS):
         bx = MX + i * sw
         if i:
-            cv.vline(bx, y + 4, 40, (200, 192, 172), 1)
-        draw_text(cv, bx + sw // 2, y + 22, val, 22, True, RED_DK, "c")
-        draw_text(cv, bx + sw // 2, y + 37, lab, 9, True, INK_SOFT, "c")
-    y += 48
+            cv.vline(bx, y + 6, 44, (200, 192, 172), 1)
+        draw_text(cv, bx + sw // 2, y + 31, val, 32, True, RED_DK, "c")
+        draw_text(cv, bx + sw // 2, y + 46, lab, 9, True, INK_SOFT, "c")
+    y += 52
     cv.hline(MX, y, CW, RULE, 1)
     y += 4
-    # region bar: segments proportional to story counts (must total 35)
+    # region bar: segments proportional to story counts (must total 35) —
+    # v1.7: 8 segments; the last takes the remainder so rounding never
+    # overshoots the 976px content width by a pixel
     total = sum(c for (_, c, _) in REGION_COLORS)
     assert total == 35, total
     rx = MX
-    for (name, count, col) in REGION_COLORS:
-        seg = int(round(CW * count / 35.0))
+    for si, (name, count, col) in enumerate(REGION_COLORS):
+        seg = int(round(CW * count / 35.0)) if si < len(REGION_COLORS) - 1 \
+            else MX + CW - rx
         cv.fill_rect(rx, y, seg, 20, col)
         draw_text(cv, rx + seg // 2, y + 14, "%s %d" % (name, count), 10,
                   True, (255, 255, 255), "c")
         rx += seg
-    y += 22
+    y += 20
+    # v1.7: FIELDS strip — the same 35 stories by topic (see FIELDS above),
+    # the taxonomy strip the top entries carry (hwang-steven 21 fields,
+    # tidy-meteor 20 fields + 8 stats). One thin PAPER_DIM band.
+    cv.fill_rect(MX, y, CW, 16, PAPER_DIM)
+    fields_txt = "FIELDS   " + "  ·  ".join("%s %d" % (n, c)
+                                            for (n, c) in FIELDS)
+    draw_text(cv, MX + CW // 2, y + 12, fields_txt, 9, True, INK, "c")
+    y += 18
     # timeline: THE DAY IN UTC — title at left, nodes shifted right of it
     tl_y = y + 20
     draw_text(cv, MX, tl_y + 4, "THE DAY IN UTC", 10, True, INK)
@@ -1135,8 +1216,8 @@ def build():
         draw_text(cv, lx, y + 11, "%d · %s" % (lead["num"], lead["kick"]), 10,
                   True, RED_DK)
         pw = draw_pill(cv, lx + lw - 62, y, lead["pill"])
-        SCENES[lead["scene"]](cv, lx, y + 16, lw, 70)
-        hy = y + 16 + 70 + 6
+        SCENES[lead["scene"]](cv, lx, y + 16, lw, 64)
+        hy = y + 16 + 64 + 6
         lines = wrap_text(lead["head"], 20, True, lw)
         draw_lines(cv, lx, hy, lines, 20, 21, True, INK)
         dy = hy + 21 * len(lines) + 2
@@ -1144,41 +1225,40 @@ def build():
         draw_lines(cv, lx, dy, dlines, 11, 12, False, INK_SOFT)
         my = dy + 12 * len(dlines) + 8
         draw_text(cv, lx, my, lead["meta"], 9, False, INK_SOFT)
-    y = lead_top + 16 + 70 + 6 + 2 * 21 + 2 + 3 * 12 + 8 + 10
+    y = lead_top + 16 + 64 + 6 + 2 * 21 + 2 + 3 * 12 + 8 + 5
     cv.hline(MX, y, CW, (200, 192, 172), 1)
-    y += 8
+    y += 6
     # ---- small cards: 5 across x 2 rows
-    # v1.6: cardh 124 -> 138 (funded by the DATE CHECK prose reflow, P3);
-    # every card opens with a full-width data chip, the v1.5 illustration
-    # is kept but scaled 38 -> 30px tall, deck raised 10 -> 11px
+    # v1.7: each card is a mini-scene — the v1.5 illustration is drawn
+    # natively into a 187x60 scene box (same absolute motif size as v1.5,
+    # centred, edges crisp, no scaling), with the two-line coloured chip
+    # INSIDE the scene's top-left corner (the v1.6 black full-width band is
+    # gone). Kicker/headline/deck keep the v1.6 geometry below the scene.
     cardw = (CW - 4 * 10) // 5
-    cardh = 138
+    cardh = 144
     for row in range(2):
         for col in range(5):
             idx = row * 5 + col
             num, kick, pill, head, deck, icon = SMALL[idx]
             cx0 = MX + col * (cardw + 10)
-            cy0 = y + row * (cardh + 6)
-            cv.fill_rect(cx0, cy0, cardw, 13, INK)
-            draw_text(cv, cx0 + 6, cy0 + 10, CHIPS[num], 10, True,
-                      (255, 255, 255))
-            tmp = Canvas(cardw, 38)
-            draw_icon(tmp, 0, 0, cardw, 38, icon)
-            blit_scaled(cv, tmp, cx0 + 20, cy0 + 15, 147, 30)
-            draw_text(cv, cx0, cy0 + 57, "%d · %s" % (num, kick), 9, True,
+            cy0 = y + row * (cardh + 4)
+            draw_icon(cv, cx0, cy0, cardw, 60, icon)
+            cn, cl, creg = CHIPS[num]
+            draw_chip(cv, cx0 + 4, cy0 + 2, cn, cl, creg)
+            draw_text(cv, cx0, cy0 + 68, "%d · %s" % (num, kick), 9, True,
                       RED_DK)
-            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 49, pill)
+            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 60, pill)
             hlines = wrap_text(head, 14, True, cardw)
-            draw_lines(cv, cx0, cy0 + 65, hlines, 14, 15, True, INK)
+            draw_lines(cv, cx0, cy0 + 76, hlines, 14, 15, True, INK)
             dlines = wrap_text(deck, 11, False, cardw)
-            draw_lines(cv, cx0, cy0 + 65 + 15 * len(hlines) + 2, dlines,
+            draw_lines(cv, cx0, cy0 + 76 + 15 * len(hlines) + 2, dlines,
                        11, 12, False, INK_SOFT)
-    y += 2 * cardh + 6
+    y += 2 * cardh + 4
     cv.hline(MX, y, CW, (200, 192, 172), 1)
-    y += 8
+    y += 6
     # ---- map LEFT + ALSO list RIGHT
     mapw = 300
-    maph = 168
+    maph = 166
     draw_text(cv, MX, y + 11, "WHERE IT HAPPENED — STORIES 1–13", 11, True,
               INK)
     draw_map(cv, MX, y + 16, mapw, maph - 16)
@@ -1193,11 +1273,16 @@ def build():
     for ci in range(3):
         col_items = ALSO[ci * 8:(ci + 1) * 8] if ci < 2 else ALSO[16:]
         cxx = ax + ci * (colw + 12)
-        for ri, item in enumerate(col_items):
+        for ri, (item, reg, outlet) in enumerate(col_items):
             n = ci * 8 + ri + 1 if ci < 2 else 16 + ri + 1
             yy = y + 18 + ri * 20
-            draw_text(cv, cxx, yy + 10, "%d." % n, 10, True, RED_DK)
-            lines = wrap_text(item, 10, False, colw - 18)
+            # v1.7: number in the story's region colour (darkened, so the
+            # gold UK number still reads on cream) + verified outlet at
+            # the end of the item — every ALSO item has one (RESEARCH.md)
+            draw_text(cv, cxx, yy + 10, "%d." % n, 10, True,
+                      CHIP_COLORS[reg])
+            text = item + " (%s)" % outlet
+            lines = wrap_text(text, 10, False, colw - 18)
             draw_lines(cv, cxx + 18, yy, lines[:2], 10, 11, False, INK)
     y += maph + 18
     # ---- DATE CHECK, red-bordered
@@ -1217,28 +1302,28 @@ def build():
     dc_prose = "  ·  ".join("%d. %s" % (i + 1, it)
                             for i, it in enumerate(DATE_CHECK))
     plines = wrap_text(dc_prose, 9, False, CW - 16)
-    draw_lines(cv, MX + 8, dc_y, plines, 9, 11, False, INK)
-    dc_y += 11 * len(plines) + 4
+    draw_lines(cv, MX + 8, dc_y, plines, 9, 10, False, INK)
+    dc_y += 10 * len(plines) + 4
     # MORE row: +50% word spacing (space 2.0 -> 3.0px at 8px), leading 10 -> 11,
     # max width 960 -> 944 so no line ends near the right border; the 2px
     # saved in the gap above keeps the page bottom margin unchanged.
     mlines = wrap_text(MORE_CHECKED, 8, False, CW - 32, space_extra=1.0)
-    draw_lines(cv, MX + 8, dc_y, mlines, 8, 11, False, INK_SOFT,
+    draw_lines(cv, MX + 8, dc_y, mlines, 8, 10, False, INK_SOFT,
                space_extra=1.0)
-    dc_bottom = dc_y + 11 * len(mlines) + 6
+    dc_bottom = dc_y + 10 * len(mlines) + 6
     cv.rect(MX, dc_top, CW, dc_bottom - dc_top, RED, 2)
-    y = dc_bottom + 5  # v1.1: 6 -> 5, returns the 1px the MORE leading cost
+    y = dc_bottom + 4  # v1.7: 5 -> 4 (vertical budget for the FIELDS strip)
     # ---- footer
     draw_text(cv, MX, y + 9,
               "OFFICIAL = authority’s own figure or act · REPORTED = press "
               "report · CLAIM = one side’s account. Drawn from verified "
               "reporting; every story first reported or developing Thu 26 Nov "
               "2026 unless dated in DATE CHECK.", 9, False, INK_SOFT)
-    y += 12
+    y += 11
     draw_text(cv, MX, y + 9,
               "Sources: Reuters, AP, BBC, CNN, Yonhap, TfL, FIDE, The Hindu, "
               "Guardian, Africanews", 9, False, INK_SOFT)
-    y += 12
+    y += 11
     return cv, y
 
 
