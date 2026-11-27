@@ -54,13 +54,18 @@ REGION_COLORS = [
     # lakes, WORLD) dropped to keep the total at 40. New totals: EAST 4
     # + SOUTH 2 + ME 4 + AFRICA 4 + AM 10 + OC 4 + UK 3 + EUROPE 5 + WORLD 4
     # = 40.
-    ("EAST ASIA", 4, (58, 96, 135)),
+    # v2.5: Kuwait -> L3 (ME, was ALSO), Bogor -> card S9 (EAST ASIA,
+    # replaces Mumbai SOUTH ASIA), +UK migration ALSO (UK), +Bissau ALSO
+    # (AFRICA); Mumbai + Hong Kong stay via ALSO. New totals: EAST 5
+    # + SOUTH 2 + ME 4 + AFRICA 5 + AM 10 + OC 4 + UK 4 + EUROPE 5 + WORLD 4
+    # = 43.
+    ("EAST ASIA", 5, (58, 96, 135)),
     ("SOUTH ASIA", 2, (122, 88, 130)),
     ("MIDDLE EAST", 4, (171, 91, 45)),
-    ("AFRICA", 4, (178, 62, 104)),
+    ("AFRICA", 5, (178, 62, 104)),
     ("AMERICAS", 10, (123, 58, 53)),
     ("OCEANIA", 4, (55, 113, 111)),
-    ("UK", 3, (158, 120, 50)),
+    ("UK", 4, (158, 120, 50)),
     ("EUROPE", 5, (101, 113, 68)),
     ("WORLD", 4, (80, 79, 75)),
 ]
@@ -72,9 +77,17 @@ REGION_COLORS = [
 # TRADE 1 + CONFLICT 7 + ECONOMY 6 + DISASTER 7 + SOCIETY 11 + SPORT 5 +
 # CULTURE 2 + WORLD 1 = 40. v2.4: storm L1 is DISASTER (+1 vs v2.3);
 # Ras Tanura lead -> ALSO stays CONFLICT; A14 (WORLD) dropped (-1).
+# v2.5: TRADE 1 (L2) + CONFLICT 7 (L3 Kuwait, S5, A3, A8, A9, A22 Riyadh,
+# A26 Ras Tanura) + ECONOMY 6 (S6, S8, S11, A1, A2, A4) + DISASTER 8
+# (L1 storm, S4 Cairo, S9 Bogor, S13 Ebola, A11 Flinders, A17 Iowa,
+# A21 king tides, A23 Bangkok) + SOCIETY 12 (S7, A5, A6, A7, A15, A16,
+# A24 Paris, A25 Virgin, A27 Mumbai, A28 Hong Kong, A29 UK migration,
+# A30 Bissau) + SPORT 5 (S10, A12, A13, A18, A20) + CULTURE 2 (S12
+# Macy's, A19 Ramsay) + WORLD 2 (A10 Australia emissions, A14 astronaut)
+# = 43.
 FIELDS = [
-    ("TRADE", 1), ("CONFLICT", 7), ("ECONOMY", 6), ("DISASTER", 7),
-    ("SOCIETY", 11), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 1),
+    ("TRADE", 1), ("CONFLICT", 7), ("ECONOMY", 6), ("DISASTER", 8),
+    ("SOCIETY", 12), ("SPORT", 5), ("CULTURE", 2), ("WORLD", 2),
 ]
 # v1.7: chip backgrounds = region colour darkened x0.78 so white bold text
 # keeps >=4:1 contrast (the plain bar colours are too light for the 8px
@@ -417,7 +430,7 @@ def draw_lines(cv, x, y_top, lines, size, leading, bold=False, color=INK,
     return y_top + asc + (len(lines) - 1) * leading + int(size * 0.24)
 
 
-# ---- content: STORY-LIST.md is the single source of truth (40 stories)
+# ---- content: STORY-LIST.md is the single source of truth (43 stories)
 MX = 24            # left/right margin
 CW = W - 2 * MX    # content width = 976
 
@@ -428,7 +441,9 @@ STATS = [
     # (PowerOutage.us via Reuters); Nikkei +1.6% is still carried by
     # ALSO A1. "~1M" is the verified rounded figure.
     ("~1M", "WITHOUT POWER"),
-    ("$94.61", "BRENT · +3.5%"),
+    # v2.5: Thu settle $96.57 (+2.1%) — the $94.61 was the WED settle
+    # (Reuters settlement reports; The Nation: Brent gains 2.07% on 26 Nov).
+    ("$96.57", "BRENT · +2.1% THU SETTLE"),
     ("31", "DEAD · CAIRO FIRE"),
     # v2.0: "18TH / ANNIV. · 26/11 MUMBAI" replaced by the Ebola stat —
     # the duel's biggest content gap (12,021 cases in DR Congo, reported
@@ -439,11 +454,14 @@ STATS = [
 ]
 
 TIMELINE = [
-    ("01:37 GMT", "Brent $94.71 in early Asian trade"),
-    ("05:44 UTC", "EU leaders gather in Brussels"),
+    # v2.5: labels shortened to ONE line each (funds the ALSO floor:
+    # timeline advance 42 -> 32). Times stay the same; the node headers
+    # already carry the clock, so "Macy's parade hour" needs no (08:30 ET).
+    ("01:37 GMT", "Brent $94.71 early trade"),
+    ("05:44 UTC", "EU leaders meet in Brussels"),
     ("12:00 UTC", "London Tube strike begins"),
-    ("13:30 UTC", "Macy’s parade hour (08:30 ET)"),
-    ("14:00 UTC", "Gukesh–Sindarov Game 3 begins"),
+    ("13:30 UTC", "Macy’s parade hour"),
+    ("14:00 UTC", "Game 3 begins in Geneva"),
     ("21:00 UTC", "No Tube service in London"),
 ]
 
@@ -458,8 +476,12 @@ LEADS = [
         # cancelled, 2,411 delayed; Central Park 1.82 in rain.
         "num": 1, "kick": "EAST COAST · DISASTER", "pill": "OFFICIAL",
         "head": "Nor’easter cuts power to ~1M",
-        "deck": ("The nor’easter peaks at 961,000 customers without power "
-                 "Thu evening; 454 flights cancelled, 2,411 delayed."),
+        # v2.5: the deck now names the Macy's postponement (the parade is
+        # the storm's human face; the detail — Sat 8:30 a.m., gusts 60 mph
+        # — lives in card S12). "Thu evening" dropped to stay at 2 lines.
+        "deck": ("The nor’easter peaks at 961,000 customers without power; "
+                 "454 flights cancelled, 2,411 delayed; Macy’s parade "
+                 "postponed."),
         # v2.4: WHY IT MATTERS — ~1M in the dark at the peak (deck).
         "why": "WHY IT MATTERS: ~1M in the dark at the peak.",
         "meta": "PowerOutage.us via Reuters · NWS",
@@ -483,27 +505,34 @@ LEADS = [
         "scene": "tariffs",
     },
     {
-        "num": 3, "kick": "NEW YORK · CULTURE", "pill": "OFFICIAL",
-        "head": "Macy’s 100th parade postponed",
-        # v2.4: deck reverted to the v2.2 gusts wording — the storm's
-        # power toll now lives in L1 (it was folded into this deck in
-        # v2.3). Gusts 60 mph verified (NWS high wind warning, RESEARCH.md).
-        "deck": ("First weather delay ever — the parade moves to Saturday "
-                 "8:30 a.m. as a nor’easter brings gusts to 60 mph."),
-        # v2.0: WHY IT MATTERS — first weather postponement in the
-        # parade's 100-year history (deck + RESEARCH.md: suspended only
-        # in WWII 1942-44).
-        "why": "WHY IT MATTERS: First weather delay in 100 parades.",
-        "meta": "Reuters, CNN · announced Wed",
-        "scene": "parade",
+        # v2.5: NEW L3 — Kuwait (promoted from ALSO A23). The duel's
+        # deciding factor was lead-trio strength: 6/6 top entries show
+        # Kuwait as a lead or a card; we showed it only as ALSO. The
+        # DEATHS are confirmed (Italian authorities); the ATTRIBUTION is
+        # one side's claim — the deck attributes it ("Italy blames Iran,
+        # Tehran denies") and never states Iran as the attacker as fact.
+        # Pill REPORTED (press report of confirmed deaths), not CLAIM:
+        # the claim is the blame, and it is attributed in the deck.
+        # Macy's L3 -> card S12.
+        "num": 3, "kick": "KUWAIT · CONFLICT", "pill": "REPORTED",
+        "head": "Kuwait drone attack kills 2 Italians",
+        "deck": ("Debris from a downed drone kills 2 Rheinmetall Italia "
+                 "technicians; Italy blames Iran, Tehran denies."),
+        # v2.5: WHY IT MATTERS — the Gulf war reaches Kuwait (deck).
+        "why": "WHY IT MATTERS: Gulf war reaches Kuwait.",
+        "meta": "Reuters, CNN, WSJ · Thu",
+        "scene": "kuwait",
     },
 ]
 
 # small cards: (num, kicker, pill, headline, deck, icon key)
 SMALL = [
     (4, "CAIRO · DISASTER", "OFFICIAL", "Cairo tanker fire kills 31",
-     "Fuel tanker overturns on the Ring Road, Wed evening; 21 hurt, 27 "
-     "vehicles charred; toll is preliminary. (AP)", "flame"),
+     # v2.5: hurt 21 -> 26 (Health Ministry's Thu final toll, CNN/Al
+     # Jazeera); driver, 21, detained Thu after confessing to 110 km/h;
+     # "toll is preliminary" dropped — the Thu toll is final. Still 3 lines.
+     "Fuel tanker overturns on the Ring Road, Wed evening; 26 hurt, 27 "
+     "vehicles charred. Driver, 21, detained Thu. (AP)", "flame"),
     (5, "KYIV · CONFLICT", "REPORTED", "Ukraine hits 5 jets; Kyiv struck",
      # v2.3: deck reworded to carry story H — overnight ballistic-missile
      # strike on Kyiv, 7 hurt (Klitschko); 87 drones downed or suppressed
@@ -520,9 +549,14 @@ SMALL = [
     (8, "BRUSSELS · ECONOMY", "REPORTED", "EU fights over €45bn Ukraine loan",
      "Leaders meet Thu over a €1.58tn budget and Kyiv’s 2027 gap; deal "
      "aimed for 17–18 Dec. (Reuters, AP)", "flag"),
-    (9, "MUMBAI · SOCIETY", "OFFICIAL", "India marks 18 years since 26/11",
-     "166 killed in 2008; Mumbai on high alert as tributes are paid. "
-     "Jaishankar: zero tolerance on terror. (IANS)", "candle"),
+    # v2.5: S9 Mumbai (18 years since 26/11) -> ALSO A27; replaced by the
+    # Bogor mine flood — a hard-news card the top entries all carry (the
+    # #2 entry has it as a card). Facts verified 28 Nov ~01:30 WIB:
+    # Reuters 26 Nov (via Kitco) + BBC: 13 dead, 13 still trapped, rain
+    # halts rescue. The Fri toll (14/16) is NOT used.
+    (9, "BOGOR · DISASTER", "REPORTED", "Bogor mine flood kills 13",
+     "13 dead, 13 still trapped in a flooded gold mine; rain halts "
+     "rescue. (Reuters/BBC)", "mine"),
     # v2.3: S10 updated with the result, now known (G) — Game 3 ended in
     # a 60-move draw, match level 1.5–1.5; Game 4 Saturday 28 Nov
     # (Chess.com / FIDE). Headline + deck + chip updated; still 2/3 lines.
@@ -532,10 +566,13 @@ SMALL = [
     (11, "SEOUL · ECONOMY", "OFFICIAL", "Bank of Korea lifts rate to 3.25%",
      "Up 25bp, the highest in two years; 2027 growth forecast raised to "
      "4.1%. (Yonhap, CNBC)", "bank"),
-    (12, "HONG KONG · SOCIETY", "REPORTED",
-     "Hong Kong marks year since fire killed 168",
-     "Tai Po’s Wang Fuk Court, one year on. No official memorial; "
-     "families still await full answers. (Japan Times, BBC)", "memorial"),
+    # v2.5: S12 Hong Kong -> ALSO A28; replaced by Macy's (demoted L3 ->
+    # card). Deck shortened to 2 lines for the 187px card (the v2.4 L3
+    # deck was 110 chars); gusts 60 mph kept. Scene: scaled-down parade.
+    (12, "NEW YORK · CULTURE", "OFFICIAL",
+     "Macy’s 100th parade postponed",
+     "First weather delay ever; parade moves to Sat 8:30 a.m. as gusts "
+     "hit 60 mph.", "parade"),
     # v2.0: S13 Nepal (213 presumed dead) SWAPPED for the Ebola card —
     # the duel's biggest content gap. Facts verified by parent via
     # Reuters 26 Nov 2026 (DR Congo govt data): 12,021 confirmed cases,
@@ -555,18 +592,19 @@ SMALL = [
 # story's region (darkened, see CHIP_COLORS); the v1.6 black full-width
 # band is gone.
 # Regions: S4 AFRICA (v2.0: Cairo moved MIDDLE EAST -> AFRICA), S5 EUROPE,
-# S6 AMERICAS, S7 UK, S8 EUROPE, S9 SOUTH ASIA, S10 WORLD, S11 EAST ASIA,
-# S12 EAST ASIA, S13 AFRICA (v2.0: Ebola, was SOUTH ASIA Nepal).
+# S6 AMERICAS, S7 UK, S8 EUROPE, S9 EAST ASIA (v2.5: Bogor, was SOUTH ASIA
+# Mumbai), S10 WORLD, S11 EAST ASIA, S12 AMERICAS (v2.5: Macy's, was EAST
+# ASIA Hong Kong), S13 AFRICA (v2.0: Ebola, was SOUTH ASIA Nepal).
 CHIPS = {
     4: ("31", "DEAD", "AFRICA"),
     5: ("5", "JETS DOWNED", "EUROPE"),
     6: ("−4.6%", "THEN RECOVERED", "AMERICAS"),
     7: ("TUBE", "HALTED", "UK"),
     8: ("€45BN", "LOAN", "EUROPE"),
-    9: ("18 YEARS", "SINCE 26/11", "SOUTH ASIA"),
+    9: ("13", "DEAD", "EAST ASIA"),
     10: ("1.5–1.5", "DRAW", "WORLD"),
     11: ("3.25%", "RATE", "EAST ASIA"),
-    12: ("168", "DEAD", "EAST ASIA"),
+    12: ("100TH", "PARADE", "AMERICAS"),
     13: ("12,021", "CASES", "AFRICA"),
 }
 
@@ -586,8 +624,12 @@ CHIP_POS = {}
 # British, Lille/Bayern + ECB stay EUROPE); outlet = first-listed source
 # for that item in RESEARCH.md (all 22 verified there).
 ALSO = [
-    ("Asia rebounds: Nikkei +1.6% as tariffs look milder; Shanghai −2.1%", "EAST ASIA", "CNBC"),
-    ("Brent $94.61 (+3.5%); WTI $83.68 (+2%) as Gulf fears lift oil", "WORLD", "Reuters"),
+    # v2.5: A1 corrected — Thu close +0.9% to 57,499 (the +1.6% was the
+    # intraday peak); Shanghai Thu close FLAT +0.01% (the −2.1% was
+    # Wednesday's close). Barchart / Japan.co.jp / Nikkei.
+    ("Nikkei +0.9% to 57,499 as tariffs look milder; Shanghai flat at 3,477", "EAST ASIA", "Barchart"),
+    # v2.5: Brent Thu settle $96.57 (+2.1%); WTI unchanged from v2.4.
+    ("Brent $96.57 (+2.1%); WTI $83.68 (+2%) as Gulf fears lift oil", "WORLD", "Reuters"),
     ("Trump, Rutte urge Russia not to widen the war (Mar-a-Lago talks)", "AMERICAS", "Reuters"),
     ("ECB: Pablo Hernandez de Cos set to succeed Lagarde", "EUROPE", "Rapporteur"),
     ("Abrego Garcia reaches Spain after a 20-month US legal fight", "AMERICAS", "Euronews"),
@@ -614,7 +656,7 @@ ALSO = [
     # CNN, WSJ), A25 Bangkok blast (AP via CNN), A26 Paris march
     # (Franceinfo), A27 Virgin strike (TravelTalk / Australian Aviation).
     ("Coalition downs 2 Houthi missiles over Riyadh; Jazan port hit", "MIDDLE EAST", "Reuters"),
-    ("Kuwait drone kills 2 Italians; Italy blames Iran, Tehran denies", "MIDDLE EAST", "Reuters"),
+    # v2.5: Kuwait left the ALSO list — promoted to lead L3.
     ("Bangkok refinery blast injures 9, 3 critical; plant shut", "EAST ASIA", "AP"),
     ("Paris students march for funds; ~2,000, Bastille to Pantheon", "EUROPE", "Franceinfo"),
     ("Virgin Australia staff strike at 4 airports in pay row", "OCEANIA", "TravelTalk"),
@@ -624,6 +666,12 @@ ALSO = [
     # science curiosity with no human/policy impact — so the total stays
     # 40 after the storm's promotion to L1 (+1 AMERICAS).
     ("Houthis claim refinery hit; 4 drones downed", "MIDDLE EAST", "Reuters"),
+    # v2.5: S9 Mumbai card -> ALSO; S12 Hong Kong card -> ALSO; +2 new
+    # ALSO items (UK migration, Bissau) — ALSO 27 -> 30, total 40 -> 43.
+    ("Mumbai marks 18 years since 26/11; 166 killed in 2008", "SOUTH ASIA", "IANS"),
+    ("Hong Kong marks year since fire killed 168; families await answers", "EAST ASIA", "Japan Times"),
+    ("UK net migration 77,000, lowest since 1997", "UK", "ONS"),
+    ("Guinea-Bissau junta delays vote to Nov 2028", "AFRICA", "AP"),
 ]
 
 DATE_CHECK = [
@@ -954,8 +1002,69 @@ def scene_parade(cv, x, y, w, h):
     draw_text(cv, x + 14, y + 58, bar_txt, 9, True, (255, 255, 255))
 
 
+def scene_kuwait(cv, x, y, w, h):
+    # v2.5: NEW L3 hero — Kuwait as ONE night air-defence motif: dark
+    # blue night sky + orange horizon glow + radar dish + missile
+    # launcher + drone with a red trail + gold interception burst +
+    # smoke + "2 KILLED" tag. Background is distinct from the storm's
+    # violet-grey (34,30,54) and the ship's navy (10,30,64): darker blue
+    # with the orange dusk band. The tag duplicates the death toll, the
+    # same pattern as the storm's "~1M WITHOUT POWER" tag.
+    cv.fill_rect(x, y, w, 46, (20, 24, 44))
+    cv.fill_rect(x, y + 46, w, 16, (190, 100, 50))
+    cv.fill_rect(x, y + 62, w, h - 62, (18, 20, 26))
+    # stars
+    for (sx, sy) in [(x + 20, y + 8), (x + 60, y + 6), (x + 110, y + 10),
+                     (x + 150, y + 7), (x + 290, y + 30), (x + 300, y + 12)]:
+        cv.fill_rect(sx, sy, 2, 2, (255, 255, 255))
+    # low skyline silhouette, right (Kuwait City hint)
+    for (bx0, bw0, bh0) in [(268, 12, 22), (282, 10, 30), (294, 12, 18)]:
+        cv.fill_rect(x + bx0, y + h - bh0, bw0, bh0, (12, 14, 18))
+    cv.fill_rect(x + 285, y + h - 38, 3, 3, (250, 205, 80))
+    # radar dish, left (pole + tilted dish)
+    stroke3(cv, [(x + 36, y + 78), (x + 36, y + 44)], (16, 14, 12))
+    cv.fill_ellipse(x + 36, y + 38, 16, 8, (60, 66, 76))
+    cv.fill_ellipse(x + 36, y + 36, 16, 5, (120, 126, 138))
+    # missile launcher, centre (base + angled rail + missile)
+    cv.fill_rect(x + 128, y + 78, 44, 8, (38, 34, 36))
+    stroke3(cv, [(x + 138, y + 78), (x + 158, y + 48)], (16, 14, 12))
+    stroke3(cv, [(x + 146, y + 78), (x + 166, y + 48)], (16, 14, 12))
+    cv.fill_rect(x + 156, y + 42, 4, 14, (200, 200, 200))
+    cv.fill_poly([(x + 154, y + 42), (x + 158, y + 36), (x + 162, y + 42)],
+                 (200, 200, 200))
+    # drone, top-centre (dark body + rotors + red trail to the left)
+    cv.fill_rect(x + 196, y + 12, 12, 4, (26, 24, 20))
+    for rx in (194, 206):
+        cv.fill_circle(x + rx, y + 10, 3, (26, 24, 20))
+    cv.line(x + 196, y + 14, x + 168, y + 18, (210, 48, 32))
+    cv.line(x + 196, y + 14, x + 176, y + 10, (210, 48, 32))
+    # interception burst, centre-right (gold starburst, 12 spikes)
+    bx, by = x + 224, y + 44
+    burst = []
+    for k in range(12):
+        a = k * 3.14159265 / 6.0
+        r = 11 if k % 2 == 0 else 5
+        burst.append((bx + int(round(r * _cos(a))),
+                      by + int(round(r * _sin(a)))))
+    cv.fill_poly(burst, (232, 120, 30))
+    cv.fill_circle(bx, by, 4, (250, 205, 80))
+    # smoke column rising right of the burst
+    for (sx, sy, rx, ry) in [(238, 30, 6, 4), (242, 22, 7, 4),
+                             (246, 14, 6, 3)]:
+        cv.fill_ellipse(x + sx, y + sy, rx, ry, (120, 116, 110))
+    # ground line + debris dashes
+    cv.fill_rect(x, y + 86, w, 2, (40, 36, 34))
+    for dx in (60, 100, 240):
+        cv.fill_rect(x + dx, y + 92, 14, 2, (90, 86, 80))
+    # "2 KILLED" tag, top-right, ink box (text 41.8px + 12 padding)
+    cv.fill_rect(x + w - 60, y + 6, 54, 15, INK)
+    draw_text(cv, x + w - 56, y + 17, "2 KILLED", 9, True,
+              (255, 255, 255))
+
+
 SCENES = {"tariffs": scene_tariffs, "refinery": scene_refinery,
-          "parade": scene_parade, "storm": scene_storm}
+          "parade": scene_parade, "storm": scene_storm,
+          "kuwait": scene_kuwait}
 # NOTE v2.4: scene_refinery is kept (unused since the Ras Tanura lead was
 # demoted to ALSO) — the code keeps prior scenes, like v2.3 kept the
 # v2.2 trading terminal.
@@ -986,7 +1095,8 @@ def draw_icon(cv, x, y, w, h, key):
           "flag": (26, 54, 104), "candle": (84, 50, 94),
           "chess": (22, 68, 42), "bank": (22, 80, 92),
           "memorial": (14, 18, 32), "flood": (206, 220, 232),
-          "ebola": (26, 74, 40)}[key]
+          "ebola": (26, 74, 40), "mine": (36, 32, 30),
+          "parade": (96, 104, 116)}[key]
     cv.fill_rect(x, y, w, h, bg)
     cx, cy = x + w // 2, y + h // 2
     if key == "flame":
@@ -1182,17 +1292,20 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(x, y + 38, w, h - 38, (38, 34, 36))
         # Gateway arch silhouette, left of the wreath (below the chip)
         # v2.3: arch legs 16px (was 18) — card scene is 50px now.
+        # v2.5: legs 14px — card scene is 48px now (legs end at the floor).
         cv.fill_ellipse(x + 29, y + 34, 20, 8, (30, 26, 30))
-        cv.fill_rect(x + 12, y + 34, 6, 16, (30, 26, 30))
-        cv.fill_rect(x + 40, y + 34, 6, 16, (30, 26, 30))
+        cv.fill_rect(x + 12, y + 34, 6, 14, (30, 26, 30))
+        cv.fill_rect(x + 40, y + 34, 6, 14, (30, 26, 30))
         # arch opening, sunset orange showing through (v2.1 fix: the
         # solid arch read as a dark mound; the opening makes it a gate)
         cv.fill_ellipse(x + 29, y + 38, 11, 9, (212, 128, 78))
         # row of small candles, bottom-right
         # v2.3: small candles 2px higher (card scene is 50px now).
+        # v2.5: 2px higher again (card scene is 48px now; flames end
+        # at y+39, bodies at y+48 = the floor).
         for ccx in (140, 155, 170):
-            cv.fill_rect(x + ccx, y + 42, 3, 8, (248, 244, 233))
-            cv.fill_circle(x + ccx + 1, y + 39, 2, (250, 205, 80))
+            cv.fill_rect(x + ccx, y + 40, 3, 8, (248, 244, 233))
+            cv.fill_circle(x + ccx + 1, y + 37, 2, (250, 205, 80))
         # v1.5: solemn memorial wreath with REAL leaf shapes (v1.2 leaves
         # were 2px dots that read as beads) + flame, Mumbai
         for k in range(12):
@@ -1249,9 +1362,11 @@ def draw_icon(cv, x, y, w, h, key):
         # fire-truck ladder, bottom-right to the second tower
         # v2.3: whole ladder shifted 4px up (card scene is 50px now;
         # the bottom was at y+52, past the floor).
-        stroke3(cv, [(x + 178, y + 48), (x + 142, y + 32)], RED)
-        stroke3(cv, [(x + 175, y + 48), (x + 139, y + 32)], RED)
-        for (rx0, ry0) in [(167, 42), (160, 36), (153, 31), (146, 26)]:
+        # v2.5: 2px higher again (card scene is 48px now; the ladder
+        # feet end at y+46, clear of the floor).
+        stroke3(cv, [(x + 178, y + 46), (x + 142, y + 30)], RED)
+        stroke3(cv, [(x + 175, y + 46), (x + 139, y + 30)], RED)
+        for (rx0, ry0) in [(167, 40), (160, 34), (153, 29), (146, 24)]:
             cv.line(x + rx0, y + ry0, x + rx0 + 3, y + ry0 - 4, RED)
     elif key == "chess":
         # v2.1: layered green-felt background (was cream = the page) —
@@ -1294,11 +1409,13 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(x, y + 38, w, h - 38, (24, 30, 36))
         # v2.3: skyline boxes + windows 4px higher (card scene is 50px
         # now; box bottoms were at y+53, past the floor).
-        for (bx0, by0, bw0, bh0) in [(8, 40, 10, 10), (22, 36, 12, 14),
-                                     (38, 42, 10, 8), (140, 38, 12, 12),
-                                     (156, 42, 10, 8), (170, 36, 12, 14)]:
+        # v2.5: 2px higher again (card scene is 48px now; box bottoms
+        # end at y+48 = the floor).
+        for (bx0, by0, bw0, bh0) in [(8, 38, 10, 10), (22, 34, 12, 14),
+                                     (38, 40, 10, 8), (140, 36, 12, 12),
+                                     (156, 40, 10, 8), (170, 34, 12, 14)]:
             cv.fill_rect(x + bx0, y + by0, bw0, bh0, (16, 22, 28))
-        for (wx, wy) in [(11, 43), (25, 39), (143, 41), (173, 39)]:
+        for (wx, wy) in [(11, 41), (25, 37), (143, 39), (173, 37)]:
             cv.fill_rect(x + wx, y + wy, 2, 3, (250, 205, 80))
         # light pavement strip under the bank's base (the dark base
         # would otherwise vanish into the dark skyline band)
@@ -1316,6 +1433,61 @@ def draw_icon(cv, x, y, w, h, key):
                      (cx + 42, cy - 10), (cx + 54, cy - 10)], RED)
         cv.fill_poly([(cx + 62, cy - 10), (cx + 52, cy - 15),
                       (cx + 52, cy - 5)], RED)
+    elif key == "mine":
+        # v2.5: flooded gold-mine shaft (Bogor) — dark rock walls + a
+        # black shaft opening + flood water along the floor + a rescue
+        # rope hanging from the top with a gold helmet + headlamp. The
+        # rope/helmet sit right of centre (x+113) so the top-left chip
+        # ("13 DEAD") stays clear; the water band is the flood.
+        cv.fill_rect(x, y, 30, h, (60, 52, 44))
+        cv.fill_rect(x + w - 30, y, 30, h, (60, 52, 44))
+        cv.fill_rect(x + 30, y, w - 60, h, (18, 16, 14))
+        # rock texture dots on the walls
+        for (dx, dy) in [(8, 10), (18, 22), (10, 34), (172, 8), (180, 26),
+                         (168, 38)]:
+            cv.fill_circle(x + dx, y + dy, 2, (44, 38, 32))
+        # flood water along the floor + wave dashes
+        cv.fill_rect(x, y + 32, w, h - 32, (24, 72, 110))
+        for wx in range(40, w - 20, 34):
+            cv.fill_rect(x + wx, y + 36, 18, 2, (90, 140, 190))
+        for wx in range(56, w - 20, 34):
+            cv.fill_rect(x + wx, y + 42, 18, 2, (90, 140, 190))
+        # rescue rope from the top + gold helmet + headlamp glow
+        cv.fill_rect(x + 112, y, 2, 26, (200, 190, 160))
+        cv.fill_ellipse(x + 113, y + 28, 8, 5, (250, 205, 80))
+        cv.fill_circle(x + 113, y + 25, 2, (255, 255, 255))
+        # bubbles rising in the water
+        cv.fill_circle(x + 96, y + 38, 2, (150, 190, 220))
+        cv.fill_circle(x + 128, y + 42, 2, (150, 190, 220))
+    elif key == "parade":
+        # v2.5: mini Macy's parade (demoted L3 -> card S12) — the same
+        # motifs as the lead scene, shrunk to the 48px card box: slate
+        # storm sky + rain + red balloon + small gold balloon + dark
+        # skyline with lit windows + crowd dots. The balloon sits
+        # centre-left, clear of the top-left chip ("100TH PARADE").
+        cv.fill_rect(x, y + 20, w, 14, (72, 80, 92))
+        cv.fill_rect(x, y + 34, w, h - 34, (52, 58, 66))
+        # slanted rain
+        for rx in range(10, w, 24):
+            for ry in range(4, 30, 12):
+                cv.line(x + rx, y + ry, x + rx - 6, y + ry + 4,
+                        (200, 206, 214))
+        # skyline along the floor
+        for (bx0, bw0, bh0) in [(8, 14, 12), (26, 12, 18), (42, 16, 10),
+                                (150, 12, 16), (166, 14, 12)]:
+            cv.fill_rect(x + bx0, y + h - bh0, bw0, bh0, (26, 24, 20))
+        for (wx, wy) in [(12, 40), (30, 34), (154, 36), (170, 40)]:
+            cv.fill_rect(x + wx, y + wy, 2, 3, (250, 205, 80))
+        # big red balloon + small gold balloon trailing behind
+        cv.fill_ellipse(x + 78, y + 16, 16, 11, BALLOON_RED)
+        cv.fill_ellipse(x + 74, y + 13, 6, 4, (205, 105, 92))
+        cv.fill_ellipse(x + 122, y + 12, 8, 6, GOLD)
+        # ropes trailing down from the balloon
+        cv.line(x + 66, y + 24, x + 58, y + 36, (26, 24, 20))
+        cv.line(x + 90, y + 24, x + 98, y + 36, (26, 24, 20))
+        # crowd dots along the street
+        for cxp in (30, 55, 130, 155, 175):
+            cv.fill_circle(x + cxp, y + h - 4, 3, (26, 24, 20))
     elif key == "flood":
         # v1.9: whole motif +2px down — the v1.8 front peak's snow apex
         # (917,596) touched the S13 chip's paper bottom border row
@@ -1347,13 +1519,15 @@ def draw_icon(cv, x, y, w, h, key):
         cv.fill_rect(x, y + 38, w, h - 38, (104, 80, 50))
         # left palm
         # v2.3: palm trunks end at y+49 (was y+52, past the 50px floor).
-        stroke3(cv, [(x + 12, y + 49), (x + 10, y + 34)], (18, 52, 28))
+        # v2.5: trunks end at y+48 (card scene is 48px now).
+        stroke3(cv, [(x + 12, y + 48), (x + 10, y + 34)], (18, 52, 28))
         stroke3(cv, [(x + 10, y + 34), (x + 2, y + 28)], (18, 52, 28))
         stroke3(cv, [(x + 10, y + 34), (x + 20, y + 28)], (18, 52, 28))
         stroke3(cv, [(x + 10, y + 34), (x + 4, y + 38)], (18, 52, 28))
         # right palm
         # v2.3: palm trunks end at y+49 (was y+52, past the 50px floor).
-        stroke3(cv, [(x + 176, y + 49), (x + 178, y + 34)], (18, 52, 28))
+        # v2.5: trunks end at y+48 (card scene is 48px now).
+        stroke3(cv, [(x + 176, y + 48), (x + 178, y + 34)], (18, 52, 28))
         stroke3(cv, [(x + 178, y + 34), (x + 168, y + 28)], (18, 52, 28))
         stroke3(cv, [(x + 178, y + 34), (x + 186, y + 30)], (18, 52, 28))
         stroke3(cv, [(x + 178, y + 34), (x + 170, y + 38)], (18, 52, 28))
@@ -1466,19 +1640,25 @@ CONTINENTS = [
 # label sits south-east of its dot (+30/+16, over the Atlantic) so the
 # four north-east US labels + London stay >=18px apart (audit v2.4
 # first run: +22/-18 put the storm label 13px from London's).
+# v2.5: pin 3 is Kuwait City (48.0, 29.4) — the new L3; pin 9 is Bogor
+# (106.8, -6.6) — the new S9; pin 12 is New York (Macy's) — the demoted
+# L3. Pin 6 stays New York (Nasdaq). Pin 3 label (+10/-12) clears the
+# Cairo (+8/+10) and Kyiv (+16/-12) labels; pin 12 label (-16/+10)
+# clears the Washington (-20/-14) and Nasdaq (+12/-10) labels; all
+# label pairs >=18px (audit v2.5).
 PINS = [
     (1, -66.0, 41.0, 30, 16),
     (2, -77.0, 38.9, -20, -14),
-    (3, -74.0, 40.7, -14, 8),
+    (3, 48.0, 29.4, 10, -12),
     (4, 31.2, 30.0, 8, 10),
     (5, 30.5, 50.4, 16, -12),
     (6, -74.0, 40.7, 12, -10),
     (7, -0.1, 51.5, -22, -12),
     (8, 4.4, 50.8, 16, -16),
-    (9, 72.9, 19.1, 18, -8),
+    (9, 106.8, -6.6, 18, -8),
     (10, 6.1, 46.2, 8, 22),
     (11, 127.0, 37.6, 10, -10),
-    (12, 114.2, 22.3, 10, 8),
+    (12, -74.0, 40.7, -16, 10),
     # v2.0: pin 13 moves Kathmandu (85.3, 27.7) -> Beni, North Kivu, DR
     # Congo (29.6, 0.5), the Ebola outbreak's epicentre.
     (13, 29.6, 0.5, 10, 10),
@@ -1577,7 +1757,7 @@ def build():
     y = 8
     # top strip — v2.3: advance 13 -> 12 (funds the bigger masthead)
     draw_text(cv, MX, y + 11, "THE WORLD IN ONE DAY", 11, True, INK)
-    draw_text(cv, MX + CW, y + 11, "40 STORIES · 9 REGIONS · THURSDAY 26 NOVEMBER 2026",
+    draw_text(cv, MX + CW, y + 11, "43 STORIES · 9 REGIONS · THURSDAY 26 NOVEMBER 2026",
               11, True, INK, "r")
     y += 12
     cv.hline(MX, y, CW, RULE, 2)
@@ -1588,10 +1768,10 @@ def build():
     draw_text(cv, MX + CW // 2, y + 53, "Thursday 26 November 2026", 64, True,
               INK, "c")
     y += 63
-    # red deck line: the three leads in one line
+    # red deck line: the three leads in one line — v2.5: L3 is Kuwait now.
     draw_text(cv, MX + CW // 2, y + 12,
               "Nor’easter cuts power to ~1M · US proposes tariffs on 14 "
-              "partners · Macy’s 100th parade postponed",
+              "partners · Kuwait drone kills 2 Italians",
               13, True, RED, "c")
     y += 15
     cv.hline(MX, y, CW, RULE, 1)
@@ -1599,27 +1779,30 @@ def build():
     # stat strip: 6 callouts — v1.7: values 22 -> 32px (top-10 median
     # 32-35px; ours were the smallest stat numbers in the set).
     # v2.3: advance 43 -> 37 (values y+23, labels y+34, vline 32px).
+    # v2.5: advance 37 -> 34 (values 30px at y+21, labels y+31, vline
+    # 28px) — funds the ALSO floor. Values stay >=30px (top-10 median).
     sw = CW // 6
     for i, (val, lab) in enumerate(STATS):
         bx = MX + i * sw
         if i:
-            cv.vline(bx, y + 4, 32, (200, 192, 172), 1)
-        draw_text(cv, bx + sw // 2, y + 23, val, 32, True, RED_DK, "c")
-        draw_text(cv, bx + sw // 2, y + 34, lab, 9, True, INK_SOFT, "c")
-    y += 37
+            cv.vline(bx, y + 3, 28, (200, 192, 172), 1)
+        draw_text(cv, bx + sw // 2, y + 21, val, 30, True, RED_DK, "c")
+        draw_text(cv, bx + sw // 2, y + 31, lab, 9, True, INK_SOFT, "c")
+    y += 34
     cv.hline(MX, y, CW, RULE, 1)
     y += 3
-    # region bar: segments proportional to story counts (must total 40) —
+    # region bar: segments proportional to story counts (must total 43) —
     # v1.7: 8 segments; the last takes the remainder so rounding never
     # overshoots the 976px content width by a pixel.
     # v2.3: 9 segments, totals 40. Only SOUTH ASIA 2 is narrow now
     # (49px); its label shrinks to 6px ("SOUTH ASIA 2" is 48px at 7px,
     # 41px at 6px — the loop floor is 6px so it fits with margin).
+    # v2.5: 9 segments, totals 43 (SOUTH ASIA 2 is 45px at /43).
     total = sum(c for (_, c, _) in REGION_COLORS)
-    assert total == 40, total
+    assert total == 43, total
     rx = MX
     for si, (name, count, col) in enumerate(REGION_COLORS):
-        seg = int(round(CW * count / 40.0)) if si < len(REGION_COLORS) - 1 \
+        seg = int(round(CW * count / 43.0)) if si < len(REGION_COLORS) - 1 \
             else MX + CW - rx
         cv.fill_rect(rx, y, seg, 17, col)
         label = "%s %d" % (name, count)
@@ -1630,18 +1813,22 @@ def build():
                   rsize, True, (255, 255, 255), "c")
         rx += seg
     y += 17
-    # v1.7: FIELDS strip — the same 40 stories by topic (see FIELDS above),
+    # v1.7: FIELDS strip — the same 43 stories by topic (see FIELDS above),
     # the taxonomy strip the top entries carry (hwang-steven 21 fields,
     # tidy-meteor 20 fields + 8 stats). One thin PAPER_DIM band.
     # v2.3: band 16 -> 13px, text baseline y+11, advance 15 -> 13.
-    cv.fill_rect(MX, y, CW, 13, PAPER_DIM)
+    # v2.5: band 13 -> 11px, text 8px baseline y+9, advance 13 -> 11 —
+    # funds the ALSO floor.
+    cv.fill_rect(MX, y, CW, 11, PAPER_DIM)
     fields_txt = "FIELDS   " + "  ·  ".join("%s %d" % (n, c)
                                             for (n, c) in FIELDS)
-    draw_text(cv, MX + CW // 2, y + 11, fields_txt, 9, True, INK, "c")
-    y += 13
+    draw_text(cv, MX + CW // 2, y + 9, fields_txt, 8, True, INK, "c")
+    y += 11
     # timeline: THE DAY IN UTC — title at left, nodes shifted right of it
     # v2.3: tl_y y+18 (was y+20), advance 45 -> 42.
-    tl_y = y + 18
+    # v2.5: tl_y y+14, advance 42 -> 32 — labels are ONE line now (see
+    # TIMELINE), so the block needs only tl_y+17; funds the ALSO floor.
+    tl_y = y + 14
     draw_text(cv, MX, tl_y + 4, "THE DAY IN UTC", 10, True, INK)
     cv.hline(MX + 150, tl_y, CW - 150, INK_SOFT, 1)
     tw = (CW - 150) // 6
@@ -1652,7 +1839,7 @@ def build():
         lines = wrap_text(lab, 9, False, tw - 14)
         draw_lines(cv, cx - (tw - 14) // 2, tl_y + 6, lines, 9, 10,
                    False, INK_SOFT, "l", tw - 14)
-    y += 42
+    y += 32
     # ---- three leads
     lw = (CW - 2 * 11) // 3
     lead_top = y
@@ -1687,26 +1874,30 @@ def build():
     # gone). Kicker/headline/deck keep the v1.6 geometry below the scene.
     # v2.3: cardh 138 -> 134, scene 54 -> 50 (kicker +58, pill +52,
     # headline +66); funds the bigger masthead + ALSO floor.
+    # v2.5: cardh 134 -> 130, scene 50 -> 48 (kicker +56, pill +50,
+    # headline +64); headline leading 15 -> 14, deck leading 12 -> 11 —
+    # a 2-line head + 3-line deck card now ends at cy0+128 (was cy0+134),
+    # 6px clear of the next row; funds the ALSO floor.
     cardw = (CW - 4 * 10) // 5
-    cardh = 134
+    cardh = 130
     for row in range(2):
         for col in range(5):
             idx = row * 5 + col
             num, kick, pill, head, deck, icon = SMALL[idx]
             cx0 = MX + col * (cardw + 10)
             cy0 = y + row * (cardh + 4)
-            draw_icon(cv, cx0, cy0, cardw, 50, icon)
+            draw_icon(cv, cx0, cy0, cardw, 48, icon)
             cn, cl, creg = CHIPS[num]
             cdx, cdy = CHIP_POS.get(num, (4, 2))
             draw_chip(cv, cx0 + cdx, cy0 + cdy, cn, cl, creg)
-            draw_text(cv, cx0, cy0 + 58, "%d · %s" % (num, kick), 9, True,
+            draw_text(cv, cx0, cy0 + 56, "%d · %s" % (num, kick), 9, True,
                       RED_DK)
-            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 52, pill)
+            pw = draw_pill(cv, cx0 + cardw - 58, cy0 + 50, pill)
             hlines = wrap_text(head, 14, True, cardw)
-            draw_lines(cv, cx0, cy0 + 66, hlines, 14, 15, True, INK)
+            draw_lines(cv, cx0, cy0 + 64, hlines, 14, 14, True, INK)
             dlines = wrap_text(deck, 11, False, cardw)
-            draw_lines(cv, cx0, cy0 + 66 + 15 * len(hlines) + 2, dlines,
-                       11, 12, False, INK_SOFT)
+            draw_lines(cv, cx0, cy0 + 64 + 14 * len(hlines) + 2, dlines,
+                       11, 11, False, INK_SOFT)
     y += 2 * cardh + 4
     cv.hline(MX, y, CW, (200, 192, 172), 1)
     y += 3  # v2.3: was 4 (funds the bigger masthead + ALSO floor)
@@ -1721,15 +1912,15 @@ def build():
               False, INK_SOFT)
     ax = MX + mapw + 14
     aw = CW - mapw - 14
-    # v2.3: 27 ALSO items in 3 columns of 9 (was 22 in 8/8/6).
-    draw_text(cv, ax, y + 11, "ALSO ON THURSDAY 26 NOVEMBER — 27 MORE STORIES",
+    # v2.5: 30 ALSO items in 3 columns of 10 (was 27 in 3 columns of 9).
+    draw_text(cv, ax, y + 11, "ALSO ON THURSDAY 26 NOVEMBER — 30 MORE STORIES",
               11, True, INK)
     colw = (aw - 2 * 12) // 3
     for ci in range(3):
-        col_items = ALSO[ci * 9:(ci + 1) * 9]
+        col_items = ALSO[ci * 10:(ci + 1) * 10]
         cxx = ax + ci * (colw + 12)
         for ri, (item, reg, outlet) in enumerate(col_items):
-            n = ci * 9 + ri + 1
+            n = ci * 10 + ri + 1
             yy = y + 18 + ri * 20
             # v1.7: number in the story's region colour (darkened, so the
             # gold UK number still reads on cream) + verified outlet at
@@ -1739,7 +1930,10 @@ def build():
             text = item + " (%s)" % outlet
             lines = wrap_text(text, 10, False, colw - 18)
             draw_lines(cv, cxx + 18, yy, lines[:2], 10, 11, False, INK)
-    y += 200  # v2.3: ALSO floor (9 rows end y+200); map 152
+    # v2.5: ALSO floor 200 -> 220 (10 rows end y+209; map 152). Funded by
+    # timeline −10, stat −3, FIELDS −2, cards −8 = −23; net −3, so the
+    # footer that touched the bottom edge in v2.4 (0px margin) now has 3px.
+    y += 220  # v2.5: ALSO floor (10 rows end y+209); map 152
     # ---- DATE CHECK, red-bordered
     dc_top = y
     cv.rect(MX, y, CW, 2, RED, 2)
@@ -1777,7 +1971,7 @@ def build():
     y += 9
     draw_text(cv, MX, y + 8,
               "Sources: Reuters, AP, BBC, CNN, Yonhap, TfL, FIDE, The Hindu, "
-              "Guardian, Africanews", 9, False, INK_SOFT)
+              "Guardian, Africanews, ONS", 9, False, INK_SOFT)
     y += 9
     return cv, y
 
